@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Financier à Imprimer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        .print-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .section-print {
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        .section-title-print {
+            font-size: 1.4rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .table-print {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .table-print th, .table-print td {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            text-align: right;
+        }
+        .table-print th:first-child, .table-print td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+        .table-print th {
+            background-color: var(--table-header-bg);
+            font-weight: 600;
+        }
+        .total-row {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+        .sub-total {
+            background-color: var(--bg-tertiary);
+        }
+        .btn-print {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(77, 194, 240, 0.2);
+            transition: all 0.3s ease;
+        }
+        .btn-print:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(77, 194, 240, 0.3);
+        }
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .btn-print, .theme-toggle, .main-header, .footer {
+                display: none !important;
+            }
+            .container {
+                max-width: 100% !important;
+                padding: 20px !important;
+            }
+            .section-print {
+                page-break-inside: avoid;
+                box-shadow: none;
+            }
+            .table-print {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <button class="theme-toggle btn-accessible" id="themeToggle" 
+            aria-label="Changer le thème entre clair et sombre"
+            title="Basculer entre thème clair et sombre">
+        <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+        <span id="themeText" class="sr-only">Changer le thème</span>
+        <span aria-hidden="true">Mode sombre</span>
+    </button>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="btn-home btn-accessible" 
+               aria-label="Retourner à la page d'accueil"
+               title="Retour à l'accueil">
+                <i class="fas fa-home" aria-hidden="true"></i>
+                <span class="sr-only">Accueil</span>
+            </a>
+            <div class="logo">
+                <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                <span>FinanceStart</span>
+                <span class="currency-badge" aria-label="Devise : Franc CFA">FCFA</span>
+            </div>
+            <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
+                <ul>
+                    <li><a href="index.html" title="Aller à la page d'accueil">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Accueil</span>
+                    </a></li>
+                    <li><a href="etape1-informations-generales.html" title="Aller à la section Informations Générales">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <span>Infos Générales</span>
+                    </a></li>
+                    <li><a href="etape2-besoins-demarrage.html" title="Aller à la section Besoins Démarrage">
+                        <i class="fas fa-list-check" aria-hidden="true"></i>
+                        <span>Besoins Démarrage</span>
+                    </a></li>
+                    <li><a href="etape3-financement.html" title="Aller à la section Financement">
+                        <i class="fas fa-hand-holding-usd" aria-hidden="true"></i>
+                        <span>Financement</span>
+                    </a></li>
+                    <li><a href="etape4-charges-fixes.html" title="Aller à la section Charges Fixes">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <span>Charges Fixes</span>
+                    </a></li>
+                    <li><a href="etape5-chiffre-affaires.html" title="Aller à la section Chiffre d’affaires">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>Chiffre d’affaires</span>
+                    </a></li>
+                    <li><a href="etape6-plan-financier.html" class="active" title="Voir le plan financier">
+                        <i class="fas fa-print"></i>
+                        <span>Plan à imprimer</span>
+                    </a></li>
+                </ul>
+            </nav>
+            <button class="menu-mobile btn-accessible" id="menuToggle" 
+                    aria-label="Ouvrir le menu de navigation"
+                    aria-expanded="false"
+                    aria-controls="mainNav"
+                    title="Ouvrir/Fermer le menu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="section-form">
+            <div class="container">
+                <div class="print-header">
+                    <h1><i class="fas fa-print"></i> Plan Financier à Imprimer</h1>
+                    <p>Prêt à être présenté à vos partenaires financiers</p>
+                </div>
+
+                <!-- 1. INVESTISSEMENTS ET FINANCEMENTS -->
+                <div class="section-print">
+                    <h2 class="section-title-print"><i class="fas fa-money-bill-wave"></i> Investissements et financements</h2>
+                    <table class="table-print">
+                        <thead><tr><th>Poste</th><th>Montant (FCFA)</th></tr></thead>
+                        <tbody id="tableInvestissements"></tbody>
+                        <tfoot><tr class="total-row"><td>TOTAL BESOINS</td><td id="totalBesoins"></td></tr></tfoot>
+                    </table>
+                </div>
+
+                <!-- 2. SALAIRES ET CHARGES SOCIALES -->
+                <div class="section-print">
+                    <h2 class="section-title-print"><i class="fas fa-user-tie"></i> Salaires et charges sociales</h2>
+                    <table class="table-print">
+                        <thead><tr><th>Poste</th><th>Montant (FCFA)</th></tr></thead>
+                        <tbody id="tableSalaires"></tbody>
+                    </table>
+                </div>
+
+                <!-- 3. COMPTE DE RÉSULTAT SUR 5 ANS -->
+                <div class="section-print">
+                    <h2 class="section-title-print"><i class="fas fa-file-invoice-dollar"></i> Compte de résultats prévisionnel sur 5 ans</h2>
+                    <table class="table-print">
+                        <thead><tr><th>Poste</th><th>Année 1</th><th>Année 2</th><th>Année 3</th><th>Année 4</th><th>Année 5</th></tr></thead>
+                        <tbody id="tableResultat"></tbody>
+                    </table>
+                </div>
+
+                <!-- 4. SOLDRES INTERMÉDIAIRES DE GESTION (Année 1) -->
+                <div class="section-print">
+                    <h2 class="section-title-print"><i class="fas fa-balance-scale"></i> Soldes intermédiaires de gestion (Année 1)</h2>
+                    <table class="table-print">
+                        <thead><tr><th>Poste</th><th>Montant (FCFA)</th></tr></thead>
+                        <tbody id="tableSIG"></tbody>
+                    </table>
+                </div>
+
+                <!-- 5. SEUIL DE RENTABILITÉ ÉCONOMIQUE -->
+                <div class="section-print">
+                    <h2 class="section-title-print"><i class="fas fa-chart-pie"></i> Seuil de rentabilité économique</h2>
+                    <p id="verdictRentabilite" style="font-size: 1.2rem; text-align: center; font-weight: bold;"></p>
+                    <p id="verdictTresorerie" style="font-size: 1.2rem; text-align: center; font-weight: bold;"></p>
+                </div>
+
+                <!-- BOUTON IMPRIMER -->
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-print" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimer ce plan financier
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>FinanceStart</h4>
+                    <p>Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
+                    <div class="currency-footer">
+                        <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                        <span>Calculs en <strong>Franc CFA (FCFA)</strong></span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope" aria-hidden="true"></i> contact@financestart.fr</p>
+                    <p><i class="fas fa-phone" aria-hidden="true"></i> +221 33 123 45 67</p>
+                    <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Dakar, Sénégal</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FinanceStart. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'XOF',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount).replace('XOF', 'FCFA');
+        }
+
+        function loadPlanFinancier() {
+            const data = {};
+            const keys = ['generalInfo', 'besoins', 'financement', 'charges', 'chiffreAffaires'];
+            keys.forEach(key => {
+                const saved = localStorage.getItem(`financeStart_${key}`);
+                if (saved) data[key] = JSON.parse(saved);
+            });
+
+            // === 1. INVESTISSEMENTS ===
+            const invTable = document.getElementById('tableInvestissements');
+            let totalBesoins = 0;
+            const investissements = [
+                { id: 'frais-etablissement', label: "Frais d'établissement" },
+                { id: 'frais-compteurs', label: "Frais de compteurs" },
+                { id: 'logiciels-formations', label: "Logiciels et formations" },
+                { id: 'depot-marque', label: "Dépôt de marque" },
+                { id: 'droits-entrees', label: "Droits d'entrée" },
+                { id: 'achat-fonds-commerce', label: "Achat fonds de commerce" },
+                { id: 'droit-bail', label: "Droit de bail" },
+                { id: 'caution', label: "Caution" },
+                { id: 'frais-dossier', label: "Frais de dossier" },
+                { id: 'frais-notaire', label: "Frais de notaire" },
+                { id: 'enseigne-communication', label: "Enseigne et communication" },
+                { id: 'achat-immobilier', label: "Achat immobilier" },
+                { id: 'travaux-amenagement', label: "Travaux et aménagements" },
+                { id: 'materiel', label: "Matériel" },
+                { id: 'materiel-bureau', label: "Matériel de bureau" },
+                { id: 'stock', label: "Stock" },
+                { id: 'tresorerie-depart', label: "Trésorerie de départ" }
+            ];
+
+            investissements.forEach(item => {
+                const val = parseFloat(data.besoins?.[item.id]) || 0;
+                if (val > 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${item.label}</td><td>${formatCurrency(val)}</td>`;
+                    invTable.appendChild(row);
+                    totalBesoins += val;
+                }
+            });
+
+            if (data.besoins?.['autres-depenses'] === 'true') {
+                const autre = parseFloat(data.besoins?.['montant-autres-depenses']) || 0;
+                if (autre > 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>Autres dépenses</td><td>${formatCurrency(autre)}</td>`;
+                    invTable.appendChild(row);
+                    totalBesoins += autre;
+                }
+            }
+            document.getElementById('totalBesoins').textContent = formatCurrency(totalBesoins);
+
+            // === 2. SALAIRES ET CHARGES SOCIALES ===
+            const salTable = document.getElementById('tableSalaires');
+            const salairesEmp = parseFloat(data.chiffreAffaires?.['salaire-emp-a1']) || 0;
+            const remunDir = parseFloat(data.chiffreAffaires?.['remun-dir-a1']) || 0;
+            const accre = data.chiffreAffaires?.['accre'] || 'Non';
+            const tauxDir = accre === 'Oui' ? 0.10 : 0.45;
+            const chargesSocialesDir = remunDir * tauxDir;
+
+            salTable.innerHTML = `
+                <tr><td>Salaires employés (net)</td><td>${formatCurrency(salairesEmp)}</td></tr>
+                <tr><td>Rémunération dirigeant (net)</td><td>${formatCurrency(remunDir)}</td></tr>
+                <tr><td>Charges sociales dirigeant (${accre === 'Oui' ? 'ACCRE 10%' : '45%'})</td><td>${formatCurrency(chargesSocialesDir)}</td></tr>
+                <tr class="total-row"><td>Total salaires et charges sociales</td><td>${formatCurrency(salairesEmp + remunDir + chargesSocialesDir)}</td></tr>
+            `;
+
+            // === 3. COMPTE DE RÉSULTAT SUR 5 ANS ===
+            const ca1 = data.chiffreAffaires?.['ca-mode'] === 'mode1' ?
+                Array.from({length:12}, (_,i) => parseFloat(data.chiffreAffaires?.[`ca-a1-m${i+1}`]) || 0).reduce((a,b)=>a+b,0) :
+                Array.from({length:12}, (_,i) => parseFloat(data.chiffreAffaires?.[`ca-a1-m${i+1}-manual`]) || 0).reduce((a,b)=>a+b,0);
+
+            const t1 = parseFloat(data.chiffreAffaires?.['taux-a1-a2']) || 0;
+            const t2 = parseFloat(data.chiffreAffaires?.['taux-a2-a3']) || 0;
+            const t3 = parseFloat(data.chiffreAffaires?.['taux-a3-a4']) || 0;
+            const t4 = parseFloat(data.chiffreAffaires?.['taux-a4-a5']) || 0;
+
+            const ca = [
+                ca1,
+                ca1 * (1 + t1/100),
+                ca1 * (1 + t1/100) * (1 + t2/100),
+                ca1 * (1 + t1/100) * (1 + t2/100) * (1 + t3/100),
+                ca1 * (1 + t1/100) * (1 + t2/100) * (1 + t3/100) * (1 + t4/100)
+            ];
+
+            const charges = ['assurances','telephone','abonnements','carburant','deplacement','energie','autorites','fournitures','entretien','nettoyage','publicite','loyer','expert','bancaires','taxes'];
+            const chargesTot = [0,0,0,0,0];
+            for (let annee = 0; annee < 5; annee++) {
+                let total = 0;
+                charges.forEach(c => total += parseFloat(data.charges?.[`${c}-a${annee+1}`]) || 0);
+                for (let i = 1; i <= 3; i++) total += parseFloat(data.charges?.[`autre${i}-a${annee+1}`]) || 0;
+                chargesTot[annee] = total;
+            }
+
+            const resultat = ca.map((c, i) => {
+                const cout = c * (parseFloat(data.chiffreAffaires?.['taux-cout-marchandises']) || 50) / 100;
+                const marge = c - cout;
+                const chargesFixes = chargesTot[i];
+                const salEmp = i === 0 ? salairesEmp : parseFloat(data.chiffreAffaires?.[`salaire-emp-a${i+1}`]) || 0;
+                const remDir = i === 0 ? remunDir : parseFloat(data.chiffreAffaires?.[`remun-dir-a${i+1}`]) || 0;
+                const chSocDir = i === 0 ? chargesSocialesDir : remDir * 0.45;
+                return marge - chargesFixes - salEmp - remDir - chSocDir;
+            });
+
+            const resTable = document.getElementById('tableResultat');
+            resTable.innerHTML = `
+                <tr><td>Chiffre d'affaires</td>${ca.map(c => `<td>${formatCurrency(Math.round(c))}</td>`).join('')}</tr>
+                <tr class="sub-total"><td>- Coût d'achat marchandises</td>${ca.map(c => `<td>${formatCurrency(Math.round(c * (parseFloat(data.chiffreAffaires?.['taux-cout-marchandises']) || 50) / 100))}</td>`).join('')}</tr>
+                <tr class="total-row"><td>= Marge brute</td>${ca.map(c => `<td>${formatCurrency(Math.round(c * (1 - (parseFloat(data.chiffreAffaires?.['taux-cout-marchandises']) || 50) / 100)))}</td>`).join('')}</tr>
+                <tr><td>- Charges fixes</td>${chargesTot.map(c => `<td>${formatCurrency(Math.round(c))}</td>`).join('')}</tr>
+                <tr><td>- Salaires + charges</td>${resultat.map((r, i) => {
+                    const salEmp = i === 0 ? salairesEmp : parseFloat(data.chiffreAffaires?.[`salaire-emp-a${i+1}`]) || 0;
+                    const remDir = i === 0 ? remunDir : parseFloat(data.chiffreAffaires?.[`remun-dir-a${i+1}`]) || 0;
+                    const chSocDir = i === 0 ? chargesSocialesDir : remDir * 0.45;
+                    return `<td>${formatCurrency(Math.round(salEmp + remDir + chSocDir))}</td>`;
+                }).join('')}</tr>
+                <tr class="total-row"><td>= Résultat net</td>${resultat.map(r => `<td>${formatCurrency(Math.round(r))}</td>`).join('')}</tr>
+            `;
+
+            // === 4. SOLDRES INTERMÉDIAIRES DE GESTION (ANNÉE 1) ===
+            const caAnnee1 = ca[0];
+            const coutAchat = caAnnee1 * (parseFloat(data.chiffreAffaires?.['taux-cout-marchandises']) || 50) / 100;
+            const margeBrute = caAnnee1 - coutAchat;
+            const chargesFixes1 = chargesTot[0];
+            const salEmp1 = salairesEmp;
+            const remDir1 = remunDir;
+            const chSocDir1 = chargesSocialesDir;
+            const resultat1 = margeBrute - chargesFixes1 - salEmp1 - remDir1 - chSocDir1;
+
+            document.getElementById('tableSIG').innerHTML = `
+                <tr><td>Chiffre d'affaires</td><td>${formatCurrency(Math.round(caAnnee1))}</td></tr>
+                <tr class="sub-total"><td>- Coût d'achat des marchandises</td><td>${formatCurrency(Math.round(coutAchat))}</td></tr>
+                <tr class="total-row"><td>= Marge brute</td><td>${formatCurrency(Math.round(margeBrute))}</td></tr>
+                <tr><td>- Charges fixes</td><td>${formatCurrency(Math.round(chargesFixes1))}</td></tr>
+                <tr><td>- Salaires employés</td><td>${formatCurrency(Math.round(salEmp1))}</td></tr>
+                <tr><td>- Rémunération dirigeant</td><td>${formatCurrency(Math.round(remDir1))}</td></tr>
+                <tr><td>- Charges sociales dirigeant</td><td>${formatCurrency(Math.round(chSocDir1))}</td></tr>
+                <tr class="total-row"><td>= Résultat net</td><td>${formatCurrency(Math.round(resultat1))}</td></tr>
+            `;
+
+            // === 5. VERDICT FINAL ===
+            const rentable = resultat1 >= 0;
+            const tresorerieDepart = parseFloat(data.besoins?.['tresorerie-depart']) || 0;
+            const joursClients = parseFloat(data.chiffreAffaires?.['jours-clients']) || 30;
+            const joursFournisseurs = parseFloat(data.chiffreAffaires?.['jours-fournisseurs']) || 30;
+            const bfr = (caAnnee1 * joursClients - coutAchat * joursFournisseurs) / 360;
+            const tresorerieAdequate = tresorerieDepart >= bfr;
+
+            document.getElementById('verdictRentabilite').textContent = rentable ? 
+                '✅ Votre projet est RENTABLE' : '❌ Votre projet est NON RENTABLE';
+            document.getElementById('verdictRentabilite').style.color = rentable ? '#28a745' : '#dc3545';
+
+            document.getElementById('verdictTresorerie').textContent = tresorerieAdequate ? 
+                '✅ Votre trésorerie de départ est ADEQUATE' : '⚠️ Votre trésorerie de départ est INSUFFISANTE';
+            document.getElementById('verdictTresorerie').style.color = tresorerieAdequate ? '#28a745' : '#ff9800';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPlanFinancier);
+    </script>
+    <script src="theme.js"></script>
+</body>
+</html>

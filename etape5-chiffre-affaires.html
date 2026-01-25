@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étape 5 : Chiffre d’affaires</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+</head>
+<body class="light-theme">
+    <button class="theme-toggle btn-accessible" id="themeToggle" 
+            aria-label="Changer le thème entre clair et sombre"
+            title="Basculer entre thème clair et sombre">
+        <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+        <span id="themeText" class="sr-only">Changer le thème</span>
+        <span aria-hidden="true">Mode sombre</span>
+    </button>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="btn-home btn-accessible" 
+               aria-label="Retourner à la page d'accueil"
+               title="Retour à l'accueil">
+                <i class="fas fa-home" aria-hidden="true"></i>
+                <span class="sr-only">Accueil</span>
+            </a>
+            <div class="logo">
+                <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                <span>FinanceStart</span>
+                <span class="currency-badge" aria-label="Devise : Franc CFA">FCFA</span>
+            </div>
+            <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
+                <ul>
+                    <li><a href="index.html" title="Aller à la page d'accueil">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Accueil</span>
+                    </a></li>
+                    <li><a href="etape1-informations-generales.html" title="Aller à la section Informations Générales">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <span>Infos Générales</span>
+                    </a></li>
+                    <li><a href="etape2-besoins-demarrage.html" title="Aller à la section Besoins Démarrage">
+                        <i class="fas fa-list-check" aria-hidden="true"></i>
+                        <span>Besoins Démarrage</span>
+                    </a></li>
+                    <li><a href="etape3-financement.html" title="Aller à la section Financement">
+                        <i class="fas fa-hand-holding-usd" aria-hidden="true"></i>
+                        <span>Financement</span>
+                    </a></li>
+                    <li><a href="etape4-charges-fixes.html" title="Aller à la section Charges Fixes">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <span>Charges Fixes</span>
+                    </a></li>
+                    <li><a href="etape5-chiffre-affaires.html" class="active" title="Aller à la section Chiffre d’affaires">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>Chiffre d’affaires</span>
+                    </a></li>
+                </ul>
+            </nav>
+            <button class="menu-mobile btn-accessible" id="menuToggle" 
+                    aria-label="Ouvrir le menu de navigation"
+                    aria-expanded="false"
+                    aria-controls="mainNav"
+                    title="Ouvrir/Fermer le menu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="section-form">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        4) Votre chiffre d’affaires sur 5 ans
+                    </h2>
+                    <p class="section-subtitle">
+                        Choisissez votre méthode de saisie
+                    </p>
+                </div>
+
+                <div class="form-card">
+                    <form id="caForm">
+                        <!-- Sélecteur de mode -->
+                        <div class="mode-selector">
+                            <label>
+                                <input type="radio" name="ca-mode" value="mode1" checked> 
+                                <strong>Mode 1 :</strong> Saisir année 1 + taux de croissance (calcul automatique)
+                            </label>
+                            <label>
+                                <input type="radio" name="ca-mode" value="mode2"> 
+                                <strong>Mode 2 :</strong> Saisir manuellement les 5 années
+                            </label>
+                        </div>
+
+                        <!-- ===== DESCRIPTION ET COÛTS MOYENS ===== -->
+                        <div class="form-card" style="margin: 25px 0; background: var(--card-bg); border: 1px solid var(--border-color);">
+                            <h3><i class="fas fa-file-alt"></i> Informations complémentaires</h3>
+                            
+                            <div class="form-group">
+                                <label for="ca-description">
+                                    <i class="fas fa-comment"></i> 
+                                    <span>Description de votre chiffre d’affaires</span>
+                                </label>
+                                <textarea id="ca-description" name="ca-description" rows="4" 
+                                          placeholder="Ex: Année 1 : 50 clients/mois à 20 000 FCFA... Croissance de 10% grâce à l'ouverture d'une 2ᵉ agence en année 2..."></textarea>
+                            </div>
+
+                            <h4 style="margin: 25px 0 15px;"><i class="fas fa-box"></i> Coût moyen par produit ou service</h4>
+                            <p class="section-subtitle">Ajoutez chaque produit ou service que vous vendez, avec son coût et son prix de vente.</p>
+
+                            <table class="charges-table" id="produitsTable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Produit / Service</th>
+                                        <th scope="col">Prix de vente moyen (FCFA)</th>
+                                        <th scope="col">Coût moyen unitaire (FCFA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="produitsBody">
+                                    <tr class="produit-row">
+                                        <td><input type="text" name="produit-nom-1" placeholder="Ex: Consultation"></td>
+                                        <td><input type="number" name="produit-prix-1" placeholder="0" min="0" step="100"></td>
+                                        <td><input type="number" name="produit-cout-1" placeholder="0" min="0" step="100"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <button type="button" id="btn-ajouter-produit" class="btn-secondary" style="margin-top: 15px;">
+                                <i class="fas fa-plus"></i> Ajouter un produit ou service
+                            </button>
+                        </div>
+
+                        <!-- MODE 1 -->
+                        <div id="mode1-section">
+                            <h3><i class="fas fa-calendar-alt"></i> Chiffre d’affaires – Année 1</h3>
+                            <div class="ca-grid">
+                                <div class="ca-month"><label for="ca-a1-m1">Mois 1</label><input type="number" id="ca-a1-m1" name="ca-a1-m1" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m2">Mois 2</label><input type="number" id="ca-a1-m2" name="ca-a1-m2" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m3">Mois 3</label><input type="number" id="ca-a1-m3" name="ca-a1-m3" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m4">Mois 4</label><input type="number" id="ca-a1-m4" name="ca-a1-m4" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m5">Mois 5</label><input type="number" id="ca-a1-m5" name="ca-a1-m5" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m6">Mois 6</label><input type="number" id="ca-a1-m6" name="ca-a1-m6" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m7">Mois 7</label><input type="number" id="ca-a1-m7" name="ca-a1-m7" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m8">Mois 8</label><input type="number" id="ca-a1-m8" name="ca-a1-m8" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m9">Mois 9</label><input type="number" id="ca-a1-m9" name="ca-a1-m9" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m10">Mois 10</label><input type="number" id="ca-a1-m10" name="ca-a1-m10" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m11">Mois 11</label><input type="number" id="ca-a1-m11" name="ca-a1-m11" placeholder="0" min="0" step="1000"></div>
+                                <div class="ca-month"><label for="ca-a1-m12">Mois 12</label><input type="number" id="ca-a1-m12" name="ca-a1-m12" placeholder="0" min="0" step="1000"></div>
+                            </div>
+
+                            <div class="amortissement-section">
+                                <h4><i class="fas fa-trend-up"></i> Taux de croissance annuels</h4>
+                                <p class="section-subtitle">Indiquez la croissance souhaitée entre chaque année (%)</p>
+                                <div class="amortissement-grid">
+                                    <div class="amortissement-item">
+                                        <label for="taux-a1-a2">Année 1 → 2</label>
+                                        <input type="number" id="taux-a1-a2" value="10" min="0" max="100" step="0.1">
+                                        <span>%</span>
+                                    </div>
+                                    <div class="amortissement-item">
+                                        <label for="taux-a2-a3">Année 2 → 3</label>
+                                        <input type="number" id="taux-a2-a3" value="10" min="0" max="100" step="0.1">
+                                        <span>%</span>
+                                    </div>
+                                    <div class="amortissement-item">
+                                        <label for="taux-a3-a4">Année 3 → 4</label>
+                                        <input type="number" id="taux-a3-a4" value="10" min="0" max="100" step="0.1">
+                                        <span>%</span>
+                                    </div>
+                                    <div class="amortissement-item">
+                                        <label for="taux-a4-a5">Année 4 → 5</label>
+                                        <input type="number" id="taux-a4-a5" value="10" min="0" max="100" step="0.1">
+                                        <span>%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="button" id="btn-calculer-ca" class="btn-primary">
+                                <i class="fas fa-calculator"></i> Calculer les 5 années
+                            </button>
+                        </div>
+
+                        <!-- MODE 2 -->
+                        <div id="mode2-section" style="display: none;">
+                            <h3><i class="fas fa-edit"></i> Chiffre d’affaires – 5 années complètes</h3>
+                            <div class="ca-full-grid">
+                                <div class="ca-year">
+                                    <h4><i class="fas fa-layer-group"></i> Année 1</h4>
+                                    <div class="ca-months">
+                                        <div class="ca-month"><label for="ca-a1-m1-manual">Mois 1</label><input type="number" id="ca-a1-m1-manual" name="ca-a1-m1-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m2-manual">Mois 2</label><input type="number" id="ca-a1-m2-manual" name="ca-a1-m2-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m3-manual">Mois 3</label><input type="number" id="ca-a1-m3-manual" name="ca-a1-m3-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m4-manual">Mois 4</label><input type="number" id="ca-a1-m4-manual" name="ca-a1-m4-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m5-manual">Mois 5</label><input type="number" id="ca-a1-m5-manual" name="ca-a1-m5-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m6-manual">Mois 6</label><input type="number" id="ca-a1-m6-manual" name="ca-a1-m6-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m7-manual">Mois 7</label><input type="number" id="ca-a1-m7-manual" name="ca-a1-m7-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m8-manual">Mois 8</label><input type="number" id="ca-a1-m8-manual" name="ca-a1-m8-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m9-manual">Mois 9</label><input type="number" id="ca-a1-m9-manual" name="ca-a1-m9-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m10-manual">Mois 10</label><input type="number" id="ca-a1-m10-manual" name="ca-a1-m10-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m11-manual">Mois 11</label><input type="number" id="ca-a1-m11-manual" name="ca-a1-m11-manual" placeholder="0" min="0" step="1000"></div>
+                                        <div class="ca-month"><label for="ca-a1-m12-manual">Mois 12</label><input type="number" id="ca-a1-m12-manual" name="ca-a1-m12-manual" placeholder="0" min="0" step="1000"></div>
+                                    </div>
+                                </div>
+                                <div class="ca-year">
+                                    <h4>Année 2</h4>
+                                    <div class="ca-months">
+                                        <div class="ca-month"><input type="number" id="ca-a2-m1-manual" name="ca-a2-m1-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m2-manual" name="ca-a2-m2-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m3-manual" name="ca-a2-m3-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m4-manual" name="ca-a2-m4-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m5-manual" name="ca-a2-m5-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m6-manual" name="ca-a2-m6-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m7-manual" name="ca-a2-m7-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m8-manual" name="ca-a2-m8-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m9-manual" name="ca-a2-m9-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m10-manual" name="ca-a2-m10-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m11-manual" name="ca-a2-m11-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a2-m12-manual" name="ca-a2-m12-manual" placeholder="0"></div>
+                                    </div>
+                                </div>
+                                <div class="ca-year">
+                                    <h4>Année 3</h4>
+                                    <div class="ca-months">
+                                        <div class="ca-month"><input type="number" id="ca-a3-m1-manual" name="ca-a3-m1-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m2-manual" name="ca-a3-m2-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m3-manual" name="ca-a3-m3-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m4-manual" name="ca-a3-m4-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m5-manual" name="ca-a3-m5-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m6-manual" name="ca-a3-m6-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m7-manual" name="ca-a3-m7-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m8-manual" name="ca-a3-m8-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m9-manual" name="ca-a3-m9-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m10-manual" name="ca-a3-m10-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m11-manual" name="ca-a3-m11-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a3-m12-manual" name="ca-a3-m12-manual" placeholder="0"></div>
+                                    </div>
+                                </div>
+                                <div class="ca-year">
+                                    <h4>Année 4</h4>
+                                    <div class="ca-months">
+                                        <div class="ca-month"><input type="number" id="ca-a4-m1-manual" name="ca-a4-m1-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m2-manual" name="ca-a4-m2-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m3-manual" name="ca-a4-m3-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m4-manual" name="ca-a4-m4-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m5-manual" name="ca-a4-m5-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m6-manual" name="ca-a4-m6-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m7-manual" name="ca-a4-m7-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m8-manual" name="ca-a4-m8-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m9-manual" name="ca-a4-m9-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m10-manual" name="ca-a4-m10-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m11-manual" name="ca-a4-m11-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a4-m12-manual" name="ca-a4-m12-manual" placeholder="0"></div>
+                                    </div>
+                                </div>
+                                <div class="ca-year">
+                                    <h4>Année 5</h4>
+                                    <div class="ca-months">
+                                        <div class="ca-month"><input type="number" id="ca-a5-m1-manual" name="ca-a5-m1-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m2-manual" name="ca-a5-m2-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m3-manual" name="ca-a5-m3-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m4-manual" name="ca-a5-m4-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m5-manual" name="ca-a5-m5-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m6-manual" name="ca-a5-m6-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m7-manual" name="ca-a5-m7-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m8-manual" name="ca-a5-m8-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m9-manual" name="ca-a5-m9-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m10-manual" name="ca-a5-m10-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m11-manual" name="ca-a5-m11-manual" placeholder="0"></div>
+                                        <div class="ca-month"><input type="number" id="ca-a5-m12-manual" name="ca-a5-m12-manual" placeholder="0"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== ANALYSE DE RENTABILITÉ ===== -->
+                        <div class="form-card" style="margin: 25px 0; background: var(--card-bg); border: 1px solid var(--border-color);">
+                            <h3><i class="fas fa-chart-line"></i> Analyse de rentabilité & trésorerie</h3>
+
+                            <div class="form-group">
+                                <label for="taux-cout-marchandises">
+                                    <i class="fas fa-percentage"></i>
+                                    <span>Coût d’achat des marchandises (% du CA)</span>
+                                </label>
+                                <input type="number" id="taux-cout-marchandises" value="50" min="0" max="100" step="1">
+                                <span class="form-hint">Quel est, en % du prix de vente, le coût d'achat de vos marchandises ? (concerne uniquement le chiffre d'affaires vente de marchandises)</span>
+                            </div>
+
+                            <div class="form-grid-2col">
+                                <div class="form-group">
+                                    <label for="jours-clients">Durée moyenne des crédits accordés aux clients en jours</label>
+                                    <input type="number" id="jours-clients" value="0" min="0" step="1">
+                                    <span class="form-hint">(temps qu'un client met pour vous payer)</span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="jours-fournisseurs">Durée moyenne des dettes fournisseurs en jours</label>
+                                    <input type="number" id="jours-fournisseurs" value="0" min="0" step="1">
+                                    <span class="form-hint">(temps que vous mettez pour payer un fournisseur)</span>
+                                </div>
+                            </div>
+
+                            <h4 style="margin: 20px 0 10px;"><i class="fas fa-user-tie"></i> Salaires et rémunération du dirigeant</h4>
+                            <div class="form-grid-2col">
+                                <div class="form-group">
+                                    <label>Salaire employés (net, par an)</label>
+                                    <div class="form-grid-5col">
+                                        <input type="number" id="salaire-emp-a1" placeholder="Année 1" min="0" step="1000">
+                                        <input type="number" id="salaire-emp-a2" placeholder="Année 2" min="0" step="1000">
+                                        <input type="number" id="salaire-emp-a3" placeholder="Année 3" min="0" step="1000">
+                                        <input type="number" id="salaire-emp-a4" placeholder="Année 4" min="0" step="1000">
+                                        <input type="number" id="salaire-emp-a5" placeholder="Année 5" min="0" step="1000">
+                                    </div>
+                                    <span class="form-hint">Saisir des chiffres annuels</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Rémunération nette dirigeant(s)</label>
+                                    <div class="form-grid-5col">
+                                        <input type="number" id="remun-dir-a1" placeholder="Année 1" min="0" step="1000">
+                                        <input type="number" id="remun-dir-a2" placeholder="Année 2" min="0" step="1000">
+                                        <input type="number" id="remun-dir-a3" placeholder="Année 3" min="0" step="1000">
+                                        <input type="number" id="remun-dir-a4" placeholder="Année 4" min="0" step="1000">
+                                        <input type="number" id="remun-dir-a5" placeholder="Année 5" min="0" step="1000">
+                                    </div>
+                                    <span class="form-hint">Saisir des chiffres annuels</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="accre" value="Oui"> Oui
+                                </label>
+                                <label>
+                                    <input type="radio" name="accre" value="Non" checked> Non
+                                </label>
+                                <span class="form-hint">Le(s) dirigeant(s) bénéficient-ils de l'ACCRE ? — sélectionnez dans la liste de choix (obligatoire)</span>
+                            </div>
+
+                            <div id="analyse-resultat" style="margin-top: 20px; padding: 15px; border-radius: 8px; display: none;">
+                                <div class="result-row">
+                                    <span>Seuil de rentabilité (Année 1) :</span>
+                                    <strong id="rentabilite-result">—</strong>
+                                </div>
+                                <div class="result-row">
+                                    <span>Trésorerie de départ :</span>
+                                    <strong id="tresorerie-result">—</strong>
+                                </div>
+                                <div id="message-conseil" style="margin-top: 10px; padding: 10px; border-radius: 6px;"></div>
+                            </div>
+
+                            <button type="button" id="btn-analyser" class="btn-primary" style="margin-top: 15px;">
+                                <i class="fas fa-calculator"></i> Analyser la rentabilité
+                            </button>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div class="navigation-buttons" style="flex-wrap: wrap; gap: 10px;">
+                            <button type="button" id="btn-precedent-5" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Précédent
+                            </button>
+                            <button type="button" id="btn-reinitialiser-page" class="btn-secondary" style="background: #f8f9fa; color: #dc3545; border-color: #dc3545;">
+                                <i class="fas fa-redo"></i> Réinitialiser toutes les données saisies
+                            </button>
+                            <!-- ✅ BOUTON FINAL : VOIR LE PLAN À IMPRIMER -->
+                            <button type="button" id="btn-vue-plan" class="btn-primary">
+                                Voir le plan à imprimer <i class="fas fa-print"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>FinanceStart</h4>
+                    <p>Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
+                    <div class="currency-footer">
+                        <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                        <span>Calculs en <strong>Franc CFA (FCFA)</strong></span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope" aria-hidden="true"></i> contact@financestart.fr</p>
+                    <p><i class="fas fa-phone" aria-hidden="true"></i> +221 33 123 45 67</p>
+                    <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Dakar, Sénégal</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FinanceStart. Tous droits réservés. | 
+                    <a href="#" onclick="clearAllData()" 
+                       title="Supprimer toutes les données enregistrées"
+                       aria-label="Réinitialiser toutes les données">Réinitialiser toutes les données saisies</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>

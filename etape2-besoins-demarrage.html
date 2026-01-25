@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étape 2 : Besoins de Démarrage</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+</head>
+<body class="light-theme">
+    <button class="theme-toggle btn-accessible" id="themeToggle" 
+            aria-label="Changer le thème entre clair et sombre"
+            title="Basculer entre thème clair et sombre">
+        <i class="fas fa-moon" id="themeIcon" aria-hidden="true"></i>
+        <span id="themeText" class="sr-only">Changer le thème</span>
+        <span aria-hidden="true">Mode sombre</span>
+    </button>
+
+    <header class="main-header">
+        <div class="container">
+            <a href="index.html" class="btn-home btn-accessible" 
+               aria-label="Retourner à la page d'accueil"
+               title="Retour à l'accueil">
+                <i class="fas fa-home" aria-hidden="true"></i>
+                <span class="sr-only">Accueil</span>
+            </a>
+            <div class="logo">
+                <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                <span>FinanceStart</span>
+                <span class="currency-badge" aria-label="Devise : Franc CFA">FCFA</span>
+            </div>
+            <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
+                <ul>
+                    <li><a href="index.html" title="Aller à la page d'accueil">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Accueil</span>
+                    </a></li>
+                    <li><a href="etape1-informations-generales.html" title="Aller à la section Informations Générales">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        <span>Infos Générales</span>
+                    </a></li>
+                    <li><a href="etape2-besoins-demarrage.html" class="active" title="Aller à la section Besoins Démarrage">
+                        <i class="fas fa-list-check" aria-hidden="true"></i>
+                        <span>Besoins Démarrage</span>
+                    </a></li>
+                    <li><a href="etape3-financement.html" title="Aller à la section Financement">
+                        <i class="fas fa-hand-holding-usd" aria-hidden="true"></i>
+                        <span>Financement</span>
+                    </a></li>
+                    <li><a href="etape4-charges-fixes.html" title="Aller à la section Charges Fixes">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <span>Charges Fixes</span>
+                    </a></li>
+                     <li><a href="etape5-chiffre-affaires.html" title="Aller à la section Chiffre d’affaires">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>Chiffre d’affaires</span>
+                    </a></li>
+                </ul>
+            </nav>
+            <button class="menu-mobile btn-accessible" id="menuToggle" 
+                    aria-label="Ouvrir le menu de navigation"
+                    aria-expanded="false"
+                    aria-controls="mainNav"
+                    title="Ouvrir/Fermer le menu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="section-form">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-list-check" aria-hidden="true"></i>
+                        1) Vos besoins de démarrage
+                    </h2>
+                    <p class="section-subtitle">
+                        Listez toutes les dépenses ou investissements que vous devrez faire avant même de démarrer l'activité
+                    </p>
+                </div>
+                <div class="form-card">
+                    <div class="checklist-warning">
+                        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                        <p><strong>Important :</strong> Cochez chaque poste de dépense que vous aurez à réaliser avant le démarrage de l'activité</p>
+                    </div>
+                    <form id="besoinsForm">
+                        <div class="checklist-grid">
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="frais-etablissement" name="frais-etablissement">
+                                    <label for="frais-etablissement">
+                                        <i class="fas fa-file-contract" aria-hidden="true"></i>
+                                        <span>Frais d'établissement</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-frais-etablissement">Montant (FCFA)</label>
+                                        <input type="number" id="montant-frais-etablissement" 
+                                               name="montant-frais-etablissement" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-frais-etablissement">Détails (facultatif)</label>
+                                        <input type="text" id="detail-frais-etablissement" 
+                                               name="detail-frais-etablissement" placeholder="Ex: Immatriculation, KBIS...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="frais-compteurs" name="frais-compteurs">
+                                    <label for="frais-compteurs">
+                                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                                        <span>Frais d'ouverture de compteurs</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-frais-compteurs">Montant (FCFA)</label>
+                                        <input type="number" id="montant-frais-compteurs" 
+                                               name="montant-frais-compteurs" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-frais-compteurs">Détails (facultatif)</label>
+                                        <input type="text" id="detail-frais-compteurs" 
+                                               name="detail-frais-compteurs" placeholder="Ex: Eau, électricité, gaz...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="logiciels-formations" name="logiciels-formations">
+                                    <label for="logiciels-formations">
+                                        <i class="fas fa-laptop-code" aria-hidden="true"></i>
+                                        <span>Logiciels, formations</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-logiciels-formations">Montant (FCFA)</label>
+                                        <input type="number" id="montant-logiciels-formations" 
+                                               name="montant-logiciels-formations" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-logiciels-formations">Détails (facultatif)</label>
+                                        <input type="text" id="detail-logiciels-formations" 
+                                               name="detail-logiciels-formations" placeholder="Ex: Logiciel comptable, formations...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="droits-entrees" name="droits-entrees">
+                                    <label for="droits-entrees">
+                                        <i class="fas fa-door-open" aria-hidden="true"></i>
+                                        <span>Droits d'entrées</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-droits-entrees">Montant (FCFA)</label>
+                                        <input type="number" id="montant-droits-entrees" 
+                                               name="montant-droits-entrees" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-droits-entrees">Détails (facultatif)</label>
+                                        <input type="text" id="detail-droits-entrees" 
+                                               name="detail-droits-entrees" placeholder="Ex: Franchise, association...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="achat-fonds-commerce" name="achat-fonds-commerce">
+                                    <label for="achat-fonds-commerce">
+                                        <i class="fas fa-store-alt" aria-hidden="true"></i>
+                                        <span>Achat fonds de commerce ou parts</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-achat-fonds-commerce">Montant (FCFA)</label>
+                                        <input type="number" id="montant-achat-fonds-commerce" 
+                                               name="montant-achat-fonds-commerce" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-achat-fonds-commerce">Détails (facultatif)</label>
+                                        <input type="text" id="detail-achat-fonds-commerce" 
+                                               name="detail-achat-fonds-commerce" placeholder="Ex: Rachat de parts sociales...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="depot-marque" name="depot-marque">
+                                    <label for="depot-marque">
+                                        <i class="fas fa-copyright" aria-hidden="true"></i>
+                                        <span>Dépôt marque, brevet, modèle</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-depot-marque">Montant (FCFA)</label>
+                                        <input type="number" id="montant-depot-marque" 
+                                               name="montant-depot-marque" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-depot-marque">Détails (facultatif)</label>
+                                        <input type="text" id="detail-depot-marque" 
+                                               name="detail-depot-marque" placeholder="Ex: INPI, OAPI...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="droit-bail" name="droit-bail">
+                                    <label for="droit-bail">
+                                        <i class="fas fa-key" aria-hidden="true"></i>
+                                        <span>Droit au bail</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-droit-bail">Montant (FCFA)</label>
+                                        <input type="number" id="montant-droit-bail" 
+                                               name="montant-droit-bail" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-droit-bail">Détails (facultatif)</label>
+                                        <input type="text" id="detail-droit-bail" 
+                                               name="detail-droit-bail" placeholder="Ex: Négociation bail commercial">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="caution" name="caution">
+                                    <label for="caution">
+                                        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                                        <span>Caution ou dépôt de garantie</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-caution">Montant (FCFA)</label>
+                                        <input type="number" id="montant-caution" 
+                                               name="montant-caution" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-caution">Détails (facultatif)</label>
+                                        <input type="text" id="detail-caution" 
+                                               name="detail-caution" placeholder="Ex: Caution locative...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="frais-dossier" name="frais-dossier">
+                                    <label for="frais-dossier">
+                                        <i class="fas fa-file-signature" aria-hidden="true"></i>
+                                        <span>Frais de dossier</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-frais-dossier">Montant (FCFA)</label>
+                                        <input type="number" id="montant-frais-dossier" 
+                                               name="montant-frais-dossier" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-frais-dossier">Détails (facultatif)</label>
+                                        <input type="text" id="detail-frais-dossier" 
+                                               name="detail-frais-dossier" placeholder="Ex: Contrats de prêt...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="frais-notaire" name="frais-notaire">
+                                    <label for="frais-notaire">
+                                        <i class="fas fa-gavel" aria-hidden="true"></i>
+                                        <span>Frais de notaire ou d'expert</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-frais-notaire">Montant (FCFA)</label>
+                                        <input type="number" id="montant-frais-notaire" 
+                                               name="montant-frais-notaire" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-frais-notaire">Détails (facultatif)</label>
+                                        <input type="text" id="detail-frais-notaire" 
+                                               name="detail-frais-notaire" placeholder="Ex: Contrat de bail, achat...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="enseigne-communication" name="enseigne-communication">
+                                    <label for="enseigne-communication">
+                                        <i class="fas fa-bullhorn" aria-hidden="true"></i>
+                                        <span>Enseigne et éléments de communication</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-enseigne">Montant (FCFA)</label>
+                                        <input type="number" id="montant-enseigne" 
+                                               name="montant-enseigne" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-enseigne">Détails (facultatif)</label>
+                                        <textarea id="detail-enseigne" 
+                                               name="detail-enseigne" placeholder="Ex: Logo, site web, cartes de visite..." 
+                                               rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="achat-immobilier" name="achat-immobilier">
+                                    <label for="achat-immobilier">
+                                        <i class="fas fa-building" aria-hidden="true"></i>
+                                        <span>Achat immobilier</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-immobilier">Montant (FCFA)</label>
+                                        <input type="number" id="montant-immobilier" 
+                                               name="montant-immobilier" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-immobilier">Détails (facultatif)</label>
+                                        <input type="text" id="detail-immobilier" 
+                                               name="detail-immobilier" placeholder="Ex: Local commercial...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="travaux-amenagement" name="travaux-amenagement">
+                                    <label for="travaux-amenagement">
+                                        <i class="fas fa-tools" aria-hidden="true"></i>
+                                        <span>Travaux et aménagements</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-travaux">Montant (FCFA)</label>
+                                        <input type="number" id="montant-travaux" 
+                                               name="montant-travaux" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-travaux">Détails (facultatif)</label>
+                                        <textarea id="detail-travaux" 
+                                               name="detail-travaux" placeholder="Ex: Aménagement du local, électricité..." 
+                                               rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="materiel" name="materiel">
+                                    <label for="materiel">
+                                        <i class="fas fa-toolbox" aria-hidden="true"></i>
+                                        <span>Matériel</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-materiel">Montant (FCFA)</label>
+                                        <input type="number" id="montant-materiel" 
+                                               name="montant-materiel" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-materiel">Détails (facultatif)</label>
+                                        <input type="text" id="detail-materiel" 
+                                               name="detail-materiel" placeholder="Ex: Machines, équipements...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="materiel-bureau" name="materiel-bureau">
+                                    <label for="materiel-bureau">
+                                        <i class="fas fa-laptop" aria-hidden="true"></i>
+                                        <span>Matériel de bureau</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-materiel-bureau">Montant (FCFA)</label>
+                                        <input type="number" id="montant-materiel-bureau" 
+                                               name="montant-materiel-bureau" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-materiel-bureau">Détails (facultatif)</label>
+                                        <input type="text" id="detail-materiel-bureau" 
+                                               name="detail-materiel-bureau" placeholder="Ex: Ordinateurs, mobilier...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="stock" name="stock">
+                                    <label for="stock">
+                                        <i class="fas fa-boxes" aria-hidden="true"></i>
+                                        <span>Stock de matières et produits</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-stock">Montant (FCFA)</label>
+                                        <input type="number" id="montant-stock" 
+                                               name="montant-stock" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-stock">Détails (facultatif)</label>
+                                        <input type="text" id="detail-stock" 
+                                               name="detail-stock" placeholder="Ex: Matières premières, produits finis...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="tresorerie-depart" name="tresorerie-depart">
+                                    <label for="tresorerie-depart">
+                                        <i class="fas fa-piggy-bank" aria-hidden="true"></i>
+                                        <span>Trésorerie de départ</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="montant-tresorerie">Montant (FCFA)</label>
+                                        <input type="number" id="montant-tresorerie" 
+                                               name="montant-tresorerie" placeholder="0" min="0" step="1000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="detail-tresorerie">Détails (facultatif)</label>
+                                        <input type="text" id="detail-tresorerie" 
+                                               name="detail-tresorerie" placeholder="Ex: Fonds de roulement initial...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checklist-item other-expenses">
+                                <div class="checklist-header">
+                                    <input type="checkbox" id="autres-depenses" name="autres-depenses">
+                                    <label for="autres-depenses">
+                                        <i class="fas fa-plus-circle" aria-hidden="true"></i>
+                                        <span>Autres dépenses (à préciser)</span>
+                                    </label>
+                                </div>
+                                <div class="checklist-details">
+                                    <div class="form-group">
+                                        <label for="libelle-autres-depenses">Libellé</label>
+                                        <input type="text" id="libelle-autres-depenses" 
+                                               name="libelle-autres-depenses" placeholder="Ex: Achat de véhicule">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="montant-autres-depenses">Montant (FCFA)</label>
+                                        <input type="number" id="montant-autres-depenses" 
+                                               name="montant-autres-depenses" placeholder="0" min="0" step="1000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="amortissement-section">
+                            <h4><i class="fas fa-calendar-alt" aria-hidden="true"></i> Durée d'amortissement des investissements</h4>
+                            <p class="section-subtitle">Indiquez la durée d'amortissement pour chaque investissement (en années)</p>
+                            <div class="amortissement-grid">
+                                <div class="amortissement-item">
+                                    <label for="amortissement-frais">Frais d'établissement</label>
+                                    <input type="number" id="amortissement-frais" min="1" max="20" value="5" step="1">
+                                    <span>années</span>
+                                </div>
+                                <div class="amortissement-item">
+                                    <label for="amortissement-materiel">Matériel</label>
+                                    <input type="number" id="amortissement-materiel" min="1" max="10" value="5" step="1">
+                                    <span>années</span>
+                                </div>
+                                <div class="amortissement-item">
+                                    <label for="amortissement-logiciels">Logiciels</label>
+                                    <input type="number" id="amortissement-logiciels" min="1" max="5" value="3" step="1">
+                                    <span>années</span>
+                                </div>
+                                <div class="amortissement-item">
+                                    <label for="amortissement-immobilier">Immobilier</label>
+                                    <input type="number" id="amortissement-immobilier" min="1" max="30" value="20" step="1">
+                                    <span>années</span>
+                                </div>
+                                <div class="amortissement-item">
+                                    <label for="amortissement-amenagement">Aménagements</label>
+                                    <input type="number" id="amortissement-amenagement" min="1" max="10" value="10" step="1">
+                                    <span>années</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="total-section">
+                            <div class="total-display">
+                                <span>Total besoins de démarrage :</span>
+                                <span id="totalBesoinsDemarrage" class="total-amount">0 FCFA</span>
+                            </div>
+                            <button type="button" id="calculerBesoinsBtn" class="btn-secondary">
+                                <i class="fas fa-calculator" aria-hidden="true"></i>
+                                <span>Calculer le total</span>
+                            </button>
+                        </div>
+                        <div class="navigation-buttons">
+                            <button type="button" id="btn-precedent-2" class="btn-secondary btn-accessible"
+                                    aria-label="Revenir à l'étape précédente"
+                                    title="Retour à l'étape 1">
+                                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                                <span>Précédent</span>
+                            </button>
+                            <button type="button" id="btn-suivant-2" class="btn-primary btn-accessible"
+                                    aria-label="Passer à l'étape suivante"
+                                    title="Aller à létape 3">
+                                <span>Suivant</span>
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>FinanceStart</h4>
+                    <p>Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
+                    <div class="currency-footer">
+                        <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+                        <span>Calculs en <strong>Franc CFA (FCFA)</strong></span>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope" aria-hidden="true"></i> contact@financestart.fr</p>
+                    <p><i class="fas fa-phone" aria-hidden="true"></i> +221 33 123 45 67</p>
+                    <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Dakar, Sénégal</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Ressources</h4>
+                    <ul>
+                        <li><a href="#" title="Télécharger les guides PDF">
+                            <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                            <span>Guides PDF</span>
+                        </a></li>
+                        <li><a href="#" title="Voir les vidéos tutorielles">
+                            <i class="fas fa-video" aria-hidden="true"></i>
+                            <span>Vidéos tutorielles</span>
+                        </a></li>
+                        <li><a href="#" title="S'inscrire aux webinaires">
+                            <i class="fas fa-calendar" aria-hidden="true"></i>
+                            <span>Webinaires</span>
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FinanceStart. Tous droits réservés. | 
+                    <a href="#" onclick="clearAllData()" 
+                       title="Supprimer toutes les données enregistrées"
+                       aria-label="Réinitialiser toutes les données">Réinitialiser toutes les données</a> | 
+                    <span id="currentTheme">Thème clair</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>
