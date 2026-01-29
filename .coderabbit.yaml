@@ -1,0 +1,10 @@
+language: fr
+reviews:
+  auto_review: true
+  review_level: thorough
+  high_level_summary: true
+
+ignore:
+  - node_modules
+  - dist
+  - build
