@@ -1,8 +1,26 @@
 language: fr
+
 reviews:
   auto_review: true
   review_level: thorough
   high_level_summary: true
+  request_changes_workflow: true
+
+focus_areas:
+  - correctness
+  - edge_cases
+  - error_handling
+  - input_validation
+  - security
+  - performance
+  - test_coverage
+  - null_checks
+  - logging
+
+pull_request:
+  require_tests_for_new_features: true
+  require_error_handling: true
+  require_input_validation: true
 
 ignore:
   - node_modules
