@@ -1,0 +1,7 @@
+{
+  "name": "FinanceStart Pro - Business Plan Analyzer",
+  "description": "Une version modernisée et robuste de FinanceStart, offrant un suivi financier complet sur 5 ans pour les entrepreneurs de la zone FCFA, avec une analyse prédictive assistée par l'IA Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
