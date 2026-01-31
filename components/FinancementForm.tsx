@@ -10,7 +10,6 @@ interface Props {
 }
 
 const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
-  // Fix: Cast Object.values to BesoinItem[] to resolve 'unknown' property access error
   const totalBesoins = (Object.values(state.besoins) as BesoinItem[]).reduce((acc, b) => acc + b.montant, 0);
   const totalFinancement = state.financements.reduce((acc, f) => acc + f.montant, 0);
   const equilibre = totalFinancement - totalBesoins;
@@ -38,94 +37,118 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sm:p-10 border border-slate-100 dark:border-slate-700">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-2xl">💰</div>
-        <div>
-          <h2 className="text-2xl font-bold">Plan de Financement</h2>
-          <p className="text-slate-500">Comment allez-vous financer vos besoins ?</p>
-        </div>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex items-center gap-3">
+        <span className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">💰</span>
+        <h2 className="text-2xl font-bold text-white">2) Le financement de vos besoins de démarrage</h2>
       </div>
+      <p className="text-slate-400 text-sm">Renseignez toutes vos sources de financement</p>
 
-      <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-2xl mb-8 flex flex-col md:flex-row gap-6 justify-between">
-        <div>
-          <span className="text-xs font-bold text-slate-400 uppercase">Besoins Totaux</span>
-          <p className="text-xl font-bold font-mono">{totalBesoins.toLocaleString()} FCFA</p>
-        </div>
-        <div>
-          <span className="text-xs font-bold text-slate-400 uppercase">Financement Actuel</span>
-          <p className="text-xl font-bold font-mono text-blue-600">{totalFinancement.toLocaleString()} FCFA</p>
-        </div>
-        <div className={`p-4 rounded-xl border-2 flex items-center gap-3 ${equilibre >= 0 ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-red-200 bg-red-50 text-red-700'}`}>
-          <div className="text-2xl">{equilibre >= 0 ? '✅' : '⚠️'}</div>
-          <div>
-            <span className="text-xs font-bold uppercase">Équilibre</span>
-            <p className="text-xl font-bold font-mono">{Math.abs(equilibre).toLocaleString()} FCFA {equilibre >= 0 ? 'Excédent' : 'Manquant'}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4 mb-8">
-        {state.financements.length === 0 && (
-          <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
-            <p className="text-slate-400">Aucune source de financement ajoutée.</p>
-          </div>
-        )}
-        {state.financements.map((f) => (
-          <div key={f.id} className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <input 
-                type="text" 
-                value={f.label} 
-                onChange={(e) => updateSource(f.id, 'label', e.target.value)}
-                className="w-full font-bold bg-transparent border-none focus:ring-0 p-0"
-              />
-            </div>
-            <div className="w-40">
-              <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Montant</label>
-              <input 
-                type="number" 
-                value={f.montant || ''} 
-                onChange={(e) => updateSource(f.id, 'montant', e.target.value)}
-                className="w-full px-2 py-1.5 rounded bg-slate-100 dark:bg-slate-800 border-none font-mono focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-            {f.taux !== undefined && (
-              <>
-                <div className="w-20">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Taux %</label>
-                  <input 
-                    type="number" 
-                    value={f.taux} 
-                    onChange={(e) => updateSource(f.id, 'taux', e.target.value)}
-                    className="w-full px-2 py-1.5 rounded bg-slate-100 dark:bg-slate-800 border-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="w-24">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Durée (mois)</label>
-                  <input 
-                    type="number" 
-                    value={f.duree} 
-                    onChange={(e) => updateSource(f.id, 'duree', e.target.value)}
-                    className="w-full px-2 py-1.5 rounded bg-slate-100 dark:bg-slate-800 border-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </>
+      <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-[#1a1f2b] border-b border-slate-800">
+              <th className="p-4 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sources de financement</th>
+              <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Montant (FCFA)</th>
+              <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Taux (%)</th>
+              <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Durée (mois)</th>
+              <th className="p-4 w-12"></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800">
+            {state.financements.length === 0 && (
+              <tr>
+                 <td colSpan={5} className="p-12 text-center text-slate-600 italic">
+                    Aucune source ajoutée. Utilisez les boutons ci-dessous.
+                 </td>
+              </tr>
             )}
-            <button onClick={() => removeSource(f.id)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">🗑️</button>
-          </div>
-        ))}
+            {state.financements.map((f) => (
+              <tr key={f.id} className="hover:bg-[#1a1f2b]/50 transition-all">
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-slate-500">{f.taux !== undefined ? '🏦' : '👤'}</span>
+                    <input 
+                      type="text" 
+                      value={f.label} 
+                      onChange={(e) => updateSource(f.id, 'label', e.target.value)}
+                      className="bg-transparent border-none text-white font-bold p-0 focus:ring-0 w-full text-sm"
+                    />
+                  </div>
+                </td>
+                <td className="p-4">
+                  <input 
+                    type="number" 
+                    value={f.montant || ''} 
+                    onChange={(e) => updateSource(f.id, 'montant', e.target.value)}
+                    className="w-full text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white font-mono text-sm focus:border-indigo-500 outline-none"
+                  />
+                </td>
+                <td className="p-4 text-center">
+                  {f.taux !== undefined ? (
+                    <input 
+                      type="number" 
+                      value={f.taux} 
+                      onChange={(e) => updateSource(f.id, 'taux', e.target.value)}
+                      className="w-20 text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none"
+                    />
+                  ) : <span className="text-slate-600">-</span>}
+                </td>
+                <td className="p-4 text-center">
+                   {f.duree !== undefined ? (
+                    <input 
+                      type="number" 
+                      value={f.duree} 
+                      onChange={(e) => updateSource(f.id, 'duree', e.target.value)}
+                      className="w-20 text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none"
+                    />
+                  ) : <span className="text-slate-600">-</span>}
+                </td>
+                <td className="p-4">
+                   <button onClick={() => removeSource(f.id)} className="text-slate-500 hover:text-red-400">🗑️</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Totals Box from Screenshot 4 */}
+        <div className="p-8 bg-[#1a1f2b] border-t border-slate-800">
+           <div className="flex flex-col md:flex-row justify-between gap-8">
+              <div className="space-y-4 flex-1">
+                 <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-400">Total besoins :</span>
+                    <span className="font-mono font-bold text-indigo-400">{totalBesoins.toLocaleString()} FCFA</span>
+                 </div>
+                 <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-400">Total financement :</span>
+                    <span className="font-mono font-bold text-indigo-400">{totalFinancement.toLocaleString()} FCFA</span>
+                 </div>
+                 <div className="flex justify-between items-center pt-4 border-t border-slate-800 font-bold">
+                    <span className="text-white uppercase tracking-widest text-xs">Équilibre :</span>
+                    <span className={equilibre >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                       {equilibre === 0 ? 'Parfaitement équilibré' : `${equilibre.toLocaleString()} FCFA`}
+                    </span>
+                 </div>
+              </div>
+              <div className="flex flex-col gap-3 justify-center">
+                 <button className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg flex items-center gap-2 text-sm">
+                    📊 Calculer l'équilibre
+                 </button>
+              </div>
+           </div>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-12">
-        <button onClick={() => addSource('apport')} className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-lg text-sm font-bold transition-all">➕ Apport</button>
-        <button onClick={() => addSource('pret')} className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-lg text-sm font-bold transition-all">🏦 Prêt</button>
-        <button onClick={() => addSource('subvention')} className="px-4 py-2 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 rounded-lg text-sm font-bold transition-all">🎁 Subvention</button>
+      <div className="flex flex-wrap gap-3">
+        <button onClick={() => addSource('pret')} className="px-6 py-2 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400">+ Ajouter un prêt</button>
+        <button onClick={() => addSource('subvention')} className="px-6 py-2 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400">+ Ajouter une subvention</button>
+        <button onClick={() => addSource('apport')} className="px-6 py-2 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400">+ Ajouter autre financement</button>
       </div>
 
-      <div className="pt-6 flex justify-between border-t border-slate-100 dark:border-slate-700">
-        <button onClick={onPrev} className="px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-xl transition-all">Précédent</button>
-        <button onClick={onNext} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95">Suivant ➜</button>
+      <div className="pt-12 flex justify-between border-t border-slate-800">
+        <button onClick={onPrev} className="px-8 py-3 border border-slate-700 text-slate-400 font-bold rounded-xl hover:bg-slate-800 transition-all">← Précédent</button>
+        <button onClick={onNext} className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xl transition-all active:scale-95">Suivant →</button>
       </div>
     </div>
   );

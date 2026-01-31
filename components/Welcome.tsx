@@ -7,39 +7,44 @@ interface Props {
 
 const Welcome: React.FC<Props> = ({ onStart }) => {
   return (
-    <div className="text-center py-12 px-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="inline-block p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl mb-6 shadow-sm">
-        <span className="text-6xl">🚀</span>
-      </div>
-      <h1 className="text-4xl sm:text-5xl font-bold mb-6 tracking-tight">
-        Lancez votre entreprise avec un <span className="text-blue-600">plan financier béton</span>
-      </h1>
-      <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-        Anticipez vos dépenses, simulez vos revenus sur 5 ans et générez un rapport complet prêt à être présenté à vos partenaires ou banques en quelques minutes.
-      </p>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
-        {[
-          { icon: '📝', title: 'Structuré', desc: 'Suivez les étapes clés de la création' },
-          { icon: '💰', title: 'Précis', desc: 'Calculs automatiques en Franc CFA' },
-          { icon: '🧠', title: 'Intelligent', desc: 'Analyse assistée par IA Gemini' }
-        ].map((item, i) => (
-          <div key={i} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <div className="text-3xl mb-3">{item.icon}</div>
-            <h3 className="font-bold mb-1">{item.title}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
-          </div>
-        ))}
+    <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-12 animate-in fade-in duration-700">
+      <div className="flex-1 space-y-8 text-center lg:text-left">
+        <h2 className="text-indigo-500 font-bold uppercase tracking-[0.2em] text-sm">Gestion de Projet</h2>
+        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight text-white">
+          Maîtrisez vos dépenses dès le départ
+        </h1>
+        <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
+          Anticipez tous les coûts nécessaires pour démarrer votre projet en toute sérénité. Une planification rigoureuse est la clé du succès.
+        </p>
+        
+        <div className="bg-[#242b3d] border-l-4 border-indigo-500 p-4 rounded-r-xl max-w-md">
+           <div className="flex items-center gap-3 text-slate-300 text-sm">
+              <span className="text-indigo-400">ℹ️</span>
+              <p>Devise utilisée : <span className="text-white font-bold">Franc CFA (FCFA)</span></p>
+           </div>
+        </div>
+
+        <button
+          onClick={onStart}
+          className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-lg shadow-xl shadow-indigo-500/20 transition-all hover:scale-105 flex items-center gap-2 mx-auto lg:mx-0"
+        >
+          <span>↓</span> Découvrir les dépenses
+        </button>
       </div>
 
-      <button
-        onClick={onStart}
-        className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full text-lg shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 transition-all hover:scale-105"
-      >
-        Commencer ma simulation
-      </button>
-      
-      <p className="mt-8 text-xs text-slate-400 uppercase tracking-widest">Calculs basés sur le référentiel OHADA</p>
+      <div className="flex-1 flex justify-center lg:justify-end">
+        <div className="relative">
+          <div className="w-64 h-48 bg-indigo-600/30 rounded-3xl flex items-center justify-center border-2 border-indigo-500/20 shadow-2xl backdrop-blur-sm">
+             <span className="text-8xl text-indigo-500 opacity-80">$ =</span>
+          </div>
+          <div className="absolute -top-4 -right-4 w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg rotate-12">
+             
+          </div>
+          <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-indigo-400 rounded-xl flex items-center justify-center text-white shadow-lg -rotate-12">
+             
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

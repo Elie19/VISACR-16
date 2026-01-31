@@ -3,13 +3,13 @@ import React from 'react';
 import { StepId } from './types';
 
 export const STEPS = [
-  { id: StepId.WELCOME, label: 'Accueil', icon: '🏠' },
-  { id: StepId.INFOS, label: 'Identité', icon: '👤' },
-  { id: StepId.BESOINS, label: 'Besoins', icon: '📋' },
-  { id: StepId.FINANCEMENT, label: 'Financement', icon: '💰' },
-  { id: StepId.CHARGES, label: 'Charges', icon: '📉' },
-  { id: StepId.REVENUE, label: 'Chiffre d’affaires', icon: '📈' },
-  { id: StepId.REPORT, label: 'Rapport', icon: '📊' },
+  { id: StepId.WELCOME, label: 'Accueil', icon: '' },
+  { id: StepId.INFOS, label: 'Identité', icon: '' },
+  { id: StepId.BESOINS, label: 'Besoins', icon: '' },
+  { id: StepId.FINANCEMENT, label: 'Financement', icon: '' },
+  { id: StepId.CHARGES, label: 'Charges', icon: '' },
+  { id: StepId.REVENUE, label: 'Chiffre d’affaires', icon: '' },
+  { id: StepId.REPORT, label: 'Rapport', icon: '' },
 ];
 
 export const LISTE_BESOINS_KEYS = [

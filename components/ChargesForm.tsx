@@ -20,53 +20,77 @@ const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 sm:p-10 border border-slate-100 dark:border-slate-700 overflow-x-auto">
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center text-2xl">📉</div>
-        <div>
-          <h2 className="text-2xl font-bold">Charges Fixes Prévisionnelles</h2>
-          <p className="text-slate-500">Estimez vos frais de fonctionnement sur 5 ans (en FCFA).</p>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex items-center gap-3">
+        <span className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">📉</span>
+        <h2 className="text-2xl font-bold text-white">3) Vos charges fixes</h2>
+      </div>
+      <p className="text-slate-400 text-sm">Les charges courantes récurrentes, hors taxes</p>
+
+      <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-[#1a1f2b] border-b border-slate-800">
+                <th className="p-4 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider">Charges fixes</th>
+                {[1, 2, 3, 4, 5].map(a => (
+                   <th key={a} className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider min-w-[120px]">
+                      Montant année {a}
+                   </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800">
+              {LISTE_CHARGES_KEYS.map((charge) => (
+                <tr key={charge.id} className="hover:bg-[#1a1f2b]/50 transition-colors">
+                  <td className="p-4 flex items-center gap-3 whitespace-nowrap">
+                    <span className="text-indigo-400 opacity-60">📍</span>
+                    <span className="text-xs font-bold text-slate-300">{charge.label}</span>
+                  </td>
+                  {[0, 1, 2, 3, 4].map(aIdx => (
+                    <td key={aIdx} className="p-2">
+                      <div className="relative group">
+                         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600 font-mono opacity-0 group-focus-within:opacity-100 transition-opacity">FCFA</span>
+                         <input 
+                           type="number"
+                           placeholder="0"
+                           value={data[`${charge.id}-${aIdx}`] || ''}
+                           onChange={(e) => handleChargeChange(charge.id, aIdx, e.target.value)}
+                           className="w-full text-right px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white font-mono text-xs focus:border-indigo-500 outline-none transition-all"
+                         />
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+              
+              {/* Total Row matching screenshot style */}
+              <tr className="bg-[#1a1f2b] font-bold">
+                <td className="p-4 uppercase text-[10px] tracking-[0.2em] text-white">TOTAL</td>
+                {[0, 1, 2, 3, 4].map(aIdx => (
+                  <td key={aIdx} className="p-4 text-right font-mono text-indigo-400 border-l border-slate-800/50">
+                    {getAnneeTotal(aIdx).toLocaleString()}
+                  </td>
+                ))}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-8 bg-[#1a1f2b] border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-6">
+           <div className="flex items-center gap-4 text-slate-400 text-xs">
+              <span className="p-2 bg-indigo-500/10 rounded-lg">💡</span>
+              <p>CFE = Cotisation Foncière des Entreprises (taxe annuelle)</p>
+           </div>
+           <button className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-2">
+              📊 Calculer les totaux par année
+           </button>
         </div>
       </div>
 
-      <table className="w-full min-w-[800px] border-collapse">
-        <thead>
-          <tr className="text-xs uppercase font-bold text-slate-400 border-b border-slate-100 dark:border-slate-700">
-            <th className="py-4 text-left">Poste de dépense</th>
-            {[1, 2, 3, 4, 5].map(a => <th key={a} className="py-4 text-center px-2">Année {a}</th>)}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-          {LISTE_CHARGES_KEYS.map((charge) => (
-            <tr key={charge.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
-              <td className="py-3 pr-4 font-medium text-slate-700 dark:text-slate-300">{charge.label}</td>
-              {[0, 1, 2, 3, 4].map(aIdx => (
-                <td key={aIdx} className="py-2 px-1">
-                  <input 
-                    type="number"
-                    placeholder="0"
-                    value={data[`${charge.id}-${aIdx}`] || ''}
-                    onChange={(e) => handleChargeChange(charge.id, aIdx, e.target.value)}
-                    className="w-full text-right px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-900 border-none font-mono text-xs focus:ring-1 focus:ring-orange-500"
-                  />
-                </td>
-              ))}
-            </tr>
-          ))}
-          <tr className="bg-slate-900 text-white font-bold">
-            <td className="py-4 px-4 rounded-l-xl">TOTAL ANNUEL</td>
-            {[0, 1, 2, 3, 4].map(aIdx => (
-              <td key={aIdx} className={`py-4 text-right px-4 font-mono ${aIdx === 4 ? 'rounded-r-xl' : ''}`}>
-                {getAnneeTotal(aIdx).toLocaleString()}
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
-
-      <div className="mt-12 pt-6 flex justify-between border-t border-slate-100 dark:border-slate-700">
-        <button onClick={onPrev} className="px-6 py-3 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-xl transition-all">Précédent</button>
-        <button onClick={onNext} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95">Suivant ➜</button>
+      <div className="pt-12 flex justify-between border-t border-slate-800">
+        <button onClick={onPrev} className="px-8 py-3 border border-slate-700 text-slate-400 font-bold rounded-xl hover:bg-slate-800 transition-all">← Précédent</button>
+        <button onClick={onNext} className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xl transition-all active:scale-95">Suivant →</button>
       </div>
     </div>
   );
