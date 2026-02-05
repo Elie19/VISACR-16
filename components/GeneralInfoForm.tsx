@@ -13,9 +13,9 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
     onUpdate({ ...data, [e.target.name]: e.target.value });
   };
 
-  const InputLabel = ({ icon, label }: { icon: string, label: string }) => (
+  const InputLabel = ({ iconClass, label }: { iconClass: string, label: string }) => (
     <label className="flex items-center gap-2 text-xs font-bold text-slate-300 mb-2">
-      <span>{icon}</span>
+      <i className={`${iconClass} text-indigo-400 w-4`}></i>
       <span className="uppercase tracking-wider">{label} :</span>
     </label>
   );
@@ -23,21 +23,23 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
       <div className="flex items-center gap-3">
-        <span className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">ℹ️</span>
+        <span className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg">
+          <i className="fa-solid fa-circle-info"></i>
+        </span>
         <h2 className="text-2xl font-bold text-white">A. Informations générales</h2>
       </div>
       <p className="text-slate-400 text-sm">Renseignez les informations de base de votre projet</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl p-8 shadow-2xl">
         <div className="flex items-center gap-2 mb-8 border-b border-slate-800 pb-4">
-           <span className="text-indigo-400"></span>
-           <h3 className="font-bold text-lg text-white">Identité</h3>
+           <i className="fa-solid fa-id-card text-indigo-400"></i>
+           <h3 className="font-bold text-lg text-white">Identité du projet</h3>
         </div>
 
         <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); onNext(); }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <InputLabel icon="" label="Prénom, nom" />
+              <InputLabel iconClass="fa-solid fa-user" label="Prénom, nom" />
               <input 
                 required
                 type="text" 
@@ -49,7 +51,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
             <div>
-              <InputLabel icon="" label="Intitulé de votre projet" />
+              <InputLabel iconClass="fa-solid fa-building" label="Intitulé de votre projet" />
               <input 
                 required
                 type="text" 
@@ -61,7 +63,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
             <div>
-              <InputLabel icon="" label="Votre statut juridique" />
+              <InputLabel iconClass="fa-solid fa-gavel" label="Votre statut juridique" />
               <select 
                 name="statutJuridique" 
                 value={data.statutJuridique} 
@@ -77,7 +79,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               </select>
             </div>
             <div>
-              <InputLabel icon="" label="Vente de marchandises ou de services" />
+              <InputLabel iconClass="fa-solid fa-shop" label="Vente de marchandises ou de services" />
               <select 
                 name="activiteType" 
                 value={data.activiteType} 
@@ -90,7 +92,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               </select>
             </div>
             <div>
-              <InputLabel icon="" label="Votre numéro de téléphone" />
+              <InputLabel iconClass="fa-solid fa-phone" label="Votre numéro de téléphone" />
               <input 
                 type="tel" 
                 name="telephone" 
@@ -101,7 +103,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
             <div>
-              <InputLabel icon="" label="Votre adresse e-mail" />
+              <InputLabel iconClass="fa-solid fa-envelope" label="Votre adresse e-mail" />
               <input 
                 type="email" 
                 name="email" 
@@ -112,7 +114,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
             <div>
-              <InputLabel icon="" label="Votre ville ou commune d'activité" />
+              <InputLabel iconClass="fa-solid fa-location-dot" label="Votre ville d'activité" />
               <input 
                 type="text" 
                 name="ville" 
@@ -123,15 +125,15 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               />
             </div>
             <div>
-              <InputLabel icon="" label="Votre devise" />
+              <InputLabel iconClass="fa-solid fa-money-bill-wave" label="Votre devise" />
               <div className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-slate-400 flex items-center gap-2">
-                 <span>🇸</span> Franc CFA (FCFA)
+                 <i className="fa-solid fa-coins text-emerald-500"></i> Franc CFA (FCFA)
               </div>
             </div>
           </div>
 
           <div>
-            <InputLabel icon="📄" label="Nom de votre projet ou description de votre activité" />
+            <InputLabel iconClass="fa-solid fa-align-left" label="Description de votre activité" />
             <textarea 
               name="descriptionProjet" 
               value={data.descriptionProjet} 
@@ -145,9 +147,9 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
           <div className="pt-6 border-t border-slate-800">
             <button 
               type="submit"
-              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2"
+              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-3"
             >
-              <span>➜</span> Suivant
+              <span>Suivant</span> <i className="fa-solid fa-chevron-right text-xs"></i>
             </button>
           </div>
         </form>

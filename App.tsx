@@ -104,7 +104,7 @@ const App: React.FC = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigateTo(StepId.WELCOME)}>
             <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg">
-              <span className="mb-0.5">📊</span>
+              <i className="fa-solid fa-chart-pie text-sm"></i>
             </div>
             <span className="font-poppins font-bold text-xl tracking-tight">FinanceStart</span>
             <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">FCFA</span>
@@ -117,18 +117,24 @@ const App: React.FC = () => {
                 onClick={() => navigateTo(s.id as StepId)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   currentStep === s.id 
-                  ? 'bg-[#374151] text-white' 
+                  ? 'bg-[#374151] text-white shadow-sm' 
                   : 'text-slate-400 hover:text-white'
                 }`}
               >
-                <span>{s.icon}</span>
+                {s.id === StepId.WELCOME && <i className="fa-solid fa-house text-xs"></i>}
+                {s.id === StepId.INFOS && <i className="fa-solid fa-user-tie text-xs"></i>}
+                {s.id === StepId.BESOINS && <i className="fa-solid fa-list-check text-xs"></i>}
+                {s.id === StepId.FINANCEMENT && <i className="fa-solid fa-hand-holding-dollar text-xs"></i>}
+                {s.id === StepId.CHARGES && <i className="fa-solid fa-file-invoice-dollar text-xs"></i>}
+                {s.id === StepId.REVENUE && <i className="fa-solid fa-arrow-up-right-dots text-xs"></i>}
+                {s.id === StepId.REPORT && <i className="fa-solid fa-file-contract text-xs"></i>}
                 <span>{s.label}</span>
               </button>
             ))}
           </nav>
 
           <div className="lg:hidden">
-             <button className="p-2 text-slate-400">☰</button>
+             <button className="p-2 text-slate-400"><i className="fa-solid fa-bars"></i></button>
           </div>
         </div>
       </header>
@@ -146,36 +152,40 @@ const App: React.FC = () => {
               <h3 className="font-bold text-white uppercase text-xs tracking-widest">FinanceStart</h3>
               <p className="leading-relaxed">Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
               <div className="flex items-center gap-2">
-                 <span>📊</span>
+                 <i className="fa-solid fa-money-bill-transfer text-indigo-400"></i>
                  <p>Calculs en <span className="text-white font-bold">Franc CFA (FCFA)</span></p>
               </div>
             </div>
             <div className="space-y-4">
               <h3 className="font-bold text-white uppercase text-xs tracking-widest">Contact</h3>
-              <p className="flex items-center gap-2">📧 contact@financestart.fr</p>
-              <p className="flex items-center gap-2">📞 +221 33 123 45 67</p>
-              <p className="flex items-center gap-2">📍 Dakar, Sénégal</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-envelope w-4"></i> contact@financestart.fr</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-phone w-4"></i> +221 33 123 45 67</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-location-dot w-4"></i> Dakar, Sénégal</p>
             </div>
             <div className="space-y-4">
               <h3 className="font-bold text-white uppercase text-xs tracking-widest">Ressources</h3>
-              <p className="flex items-center gap-2">📄 Guides PDF</p>
-              <p className="flex items-center gap-2">📹 Vidéos tutorielles</p>
-              <p className="flex items-center gap-2">🗓️ Webinaires</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-file-pdf w-4"></i> Guides PDF</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-video w-4"></i> Vidéos tutorielles</p>
+              <p className="flex items-center gap-2"><i className="fa-solid fa-calendar-check w-4"></i> Webinaires</p>
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-center gap-4">
             <p>© 2024 FinanceStart. Tous droits réservés.</p>
-            <button onClick={resetAll} className="hover:text-red-400 transition-colors">Réinitialiser les données</button>
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="hover:text-white transition-colors">Thème {isDarkMode ? 'clair' : 'sombre'}</button>
+            <button onClick={resetAll} className="hover:text-red-400 transition-colors flex items-center justify-center gap-1">
+              <i className="fa-solid fa-rotate-left"></i> Réinitialiser les données
+            </button>
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className="hover:text-white transition-colors flex items-center justify-center gap-1">
+              <i className={isDarkMode ? "fa-solid fa-sun" : "fa-solid fa-moon"}></i> Thème {isDarkMode ? 'clair' : 'sombre'}
+            </button>
           </div>
         </div>
       </footer>
 
       <button 
         onClick={() => setIsDarkMode(!isDarkMode)}
-        className="fixed bottom-6 right-6 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl z-[100] flex items-center gap-2 text-xs font-bold no-print transition-all"
+        className="fixed bottom-6 right-6 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full shadow-2xl z-[100] flex items-center gap-2 text-xs font-bold no-print transition-all hover:scale-105 active:scale-95"
       >
-        <span>{isDarkMode ? '☀️' : '🌙'}</span>
+        <i className={isDarkMode ? "fa-solid fa-sun text-sm" : "fa-solid fa-moon text-sm"}></i>
         <span>{isDarkMode ? 'Mode clair' : 'Mode sombre'}</span>
       </button>
     </div>

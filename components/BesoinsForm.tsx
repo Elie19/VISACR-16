@@ -24,14 +24,16 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20">
       <div className="flex items-center gap-3">
-        <span className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">📋</span>
+        <span className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg">
+          <i className="fa-solid fa-list-check"></i>
+        </span>
         <h2 className="text-2xl font-bold text-white">1) Vos besoins de démarrage</h2>
       </div>
       <p className="text-slate-400 text-sm">Listez toutes les dépenses ou investissements que vous devrez faire avant même de démarrer l'activité</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-         <div className="bg-orange-500/10 border-l-4 border-orange-500 p-4 m-8 flex items-start gap-3">
-            <span className="text-orange-500 mt-1">⚠️</span>
+         <div className="bg-orange-500/10 border-l-4 border-orange-500 p-4 m-8 flex items-start gap-3 rounded-r-xl">
+            <i className="fa-solid fa-triangle-exclamation text-orange-500 mt-1"></i>
             <div>
                <p className="text-sm font-bold text-orange-200">Important :</p>
                <p className="text-xs text-orange-200/80">Cochez chaque poste de dépense que vous aurez à réaliser avant le démarrage de l'activité</p>
@@ -44,24 +46,24 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
               key={item.id} 
               className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${
                 (data[item.id]?.montant || 0) > 0 
-                ? 'bg-[#1a1f2b] border-indigo-500/50' 
+                ? 'bg-[#1a1f2b] border-indigo-500/50 shadow-inner' 
                 : 'bg-[#1a1f2b]/50 border-slate-800 hover:border-slate-700'
               }`}
             >
               <div className="flex items-center gap-4 flex-1">
-                <span className="text-lg">📄</span>
+                <i className={`fa-solid fa-file-invoice-dollar text-lg ${ (data[item.id]?.montant || 0) > 0 ? 'text-indigo-400' : 'text-slate-600' }`}></i>
                 <label className="text-sm font-bold text-slate-300">{item.label}</label>
               </div>
               
               <div className="flex items-center gap-3">
                 <div className="w-40 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-mono">FCFA</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-mono font-bold">CFA</span>
                   <input 
                     type="number"
                     placeholder="0"
                     value={data[item.id]?.montant || ''}
                     onChange={(e) => handleItemChange(item.id, 'montant', e.target.value)}
-                    className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#242b3d] border border-slate-700 text-white font-mono text-right text-sm focus:border-indigo-500 outline-none"
+                    className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#242b3d] border border-slate-700 text-white font-mono text-right text-sm focus:border-indigo-500 outline-none transition-all"
                   />
                 </div>
                 {item.defaultAmort > 0 && (
@@ -82,7 +84,7 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
       </div>
 
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 no-print pointer-events-none">
-        <div className="bg-[#1a1f2b] border border-indigo-500/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between text-white pointer-events-auto">
+        <div className="bg-[#1a1f2b] border border-indigo-500/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between text-white pointer-events-auto backdrop-blur-md bg-opacity-95">
           <div className="flex items-center gap-6">
              <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Besoins</p>
@@ -90,8 +92,12 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
              </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={onPrev} className="px-6 py-2 border border-slate-700 hover:bg-slate-800 rounded-xl text-sm font-bold transition-all">Précédent</button>
-            <button onClick={onNext} className="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-bold transition-all shadow-lg">Suivant ➜</button>
+            <button onClick={onPrev} className="px-6 py-2 border border-slate-700 hover:bg-slate-800 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+              <i className="fa-solid fa-arrow-left text-xs"></i> <span>Précédent</span>
+            </button>
+            <button onClick={onNext} className="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+              <span>Suivant</span> <i className="fa-solid fa-arrow-right text-xs"></i>
+            </button>
           </div>
         </div>
       </div>
