@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { StepId, AppState, ActivityType } from './types';
-import { STEPS } from './constants';
+import { StepId, AppState, ActivityType, Currency } from './types';
+import { STEPS, SUPPORTED_CURRENCIES } from './constants';
 import Welcome from './components/Welcome';
 import GeneralInfoForm from './components/GeneralInfoForm';
 import BesoinsForm from './components/BesoinsForm';
@@ -21,6 +21,7 @@ const INITIAL_STATE: AppState = {
     ville: '',
     descriptionProjet: '',
   },
+  currency: SUPPORTED_CURRENCIES[0],
   besoins: {},
   financements: [],
   charges: {},
@@ -87,12 +88,12 @@ const App: React.FC = () => {
 
   const renderStep = () => {
     switch (currentStep) {
-      case StepId.WELCOME: return <Welcome onStart={() => navigateTo(StepId.INFOS)} />;
-      case StepId.INFOS: return <GeneralInfoForm data={state.generalInfo} onUpdate={(v) => updateState('generalInfo', v)} onNext={nextStep} />;
-      case StepId.BESOINS: return <BesoinsForm data={state.besoins} onUpdate={(v) => updateState('besoins', v)} onNext={nextStep} onPrev={prevStep} />;
+      case StepId.WELCOME: return <Welcome state={state} onStart={() => navigateTo(StepId.INFOS)} />;
+      case StepId.INFOS: return <GeneralInfoForm state={state} onUpdate={(v) => updateState('generalInfo', v)} onUpdateCurrency={(c) => updateState('currency', c)} onNext={nextStep} />;
+      case StepId.BESOINS: return <BesoinsForm state={state} onUpdate={(v) => updateState('besoins', v)} onNext={nextStep} onPrev={prevStep} />;
       case StepId.FINANCEMENT: return <FinancementForm state={state} onUpdate={(v) => updateState('financements', v)} onNext={nextStep} onPrev={prevStep} />;
-      case StepId.CHARGES: return <ChargesForm data={state.charges} onUpdate={(v) => updateState('charges', v)} onNext={nextStep} onPrev={prevStep} />;
-      case StepId.REVENUE: return <RevenueForm data={state.revenue} onUpdate={(v) => updateState('revenue', v)} onNext={nextStep} onPrev={prevStep} onReset={resetAll} />;
+      case StepId.CHARGES: return <ChargesForm state={state} onUpdate={(v) => updateState('charges', v)} onNext={nextStep} onPrev={prevStep} />;
+      case StepId.REVENUE: return <RevenueForm state={state} onUpdate={(v) => updateState('revenue', v)} onNext={nextStep} onPrev={prevStep} onReset={resetAll} />;
       case StepId.REPORT: return <Report state={state} onPrev={prevStep} onReset={resetAll} />;
       default: return null;
     }
@@ -107,7 +108,7 @@ const App: React.FC = () => {
               <i className="fa-solid fa-chart-pie text-sm"></i>
             </div>
             <span className="font-poppins font-bold text-xl tracking-tight">FinanceStart</span>
-            <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">FCFA</span>
+            <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">{state.currency.code}</span>
           </div>
 
           <nav className="hidden lg:flex items-center gap-2">
@@ -121,13 +122,7 @@ const App: React.FC = () => {
                   : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {s.id === StepId.WELCOME && <i className="fa-solid fa-house text-xs"></i>}
-                {s.id === StepId.INFOS && <i className="fa-solid fa-user-tie text-xs"></i>}
-                {s.id === StepId.BESOINS && <i className="fa-solid fa-list-check text-xs"></i>}
-                {s.id === StepId.FINANCEMENT && <i className="fa-solid fa-hand-holding-dollar text-xs"></i>}
-                {s.id === StepId.CHARGES && <i className="fa-solid fa-file-invoice-dollar text-xs"></i>}
-                {s.id === StepId.REVENUE && <i className="fa-solid fa-arrow-up-right-dots text-xs"></i>}
-                {s.id === StepId.REPORT && <i className="fa-solid fa-file-contract text-xs"></i>}
+                <i className={`fa-solid ${s.icon} text-xs`}></i>
                 <span>{s.label}</span>
               </button>
             ))}
@@ -153,24 +148,21 @@ const App: React.FC = () => {
               <p className="leading-relaxed">Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
               <div className="flex items-center gap-2">
                  <i className="fa-solid fa-money-bill-transfer text-indigo-400"></i>
-                 <p>Calculs en <span className="text-white font-bold">Franc CFA (FCFA)</span></p>
+                 <p>Projet configuré en <span className="text-white font-bold">{state.currency.name} ({state.currency.code})</span></p>
               </div>
             </div>
             <div className="space-y-4">
               <h3 className="font-bold text-white uppercase text-xs tracking-widest">Contact</h3>
               <p className="flex items-center gap-2"><i className="fa-solid fa-envelope w-4"></i> contact@financestart.fr</p>
               <p className="flex items-center gap-2"><i className="fa-solid fa-phone w-4"></i> +221 33 123 45 67</p>
-              <p className="flex items-center gap-2"><i className="fa-solid fa-location-dot w-4"></i> Dakar, Sénégal</p>
             </div>
             <div className="space-y-4">
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">Ressources</h3>
-              <p className="flex items-center gap-2"><i className="fa-solid fa-file-pdf w-4"></i> Guides PDF</p>
-              <p className="flex items-center gap-2"><i className="fa-solid fa-video w-4"></i> Vidéos tutorielles</p>
-              <p className="flex items-center gap-2"><i className="fa-solid fa-calendar-check w-4"></i> Webinaires</p>
+              <h3 className="font-bold text-white uppercase text-xs tracking-widest">Standardisation</h3>
+              <p className="text-[10px] leading-tight opacity-60">Formatage monétaire conforme à la norme ISO 4217. Précision de {state.currency.decimals} décimales pour le contexte {state.currency.code}.</p>
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-center gap-4">
-            <p>© 2024 FinanceStart. Tous droits réservés.</p>
+            <p>© {new Date().getFullYear()} FinanceStart. Tous droits réservés.</p>
             <button onClick={resetAll} className="hover:text-red-400 transition-colors flex items-center justify-center gap-1">
               <i className="fa-solid fa-rotate-left"></i> Réinitialiser les données
             </button>

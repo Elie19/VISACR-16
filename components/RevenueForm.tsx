@@ -1,17 +1,19 @@
 
 import React from 'react';
-import { RevenueState } from '../types';
+import { RevenueState, AppState } from '../types';
+import { formatCurrency } from '../constants';
 
 interface Props {
-  data: RevenueState;
+  state: AppState;
   onUpdate: (data: RevenueState) => void;
   onNext: () => void;
   onPrev: () => void;
   onReset: () => void;
 }
 
-const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
-  // Define years array for mapping the 5-year table columns.
+const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
+  const data = state.revenue;
+  const currency = state.currency;
   const years = [0, 1, 2, 3, 4];
 
   const handleCaMensuelChange = (idx: number, val: string) => {
@@ -42,7 +44,7 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
         </span>
         <h2 className="text-2xl font-bold text-white">4) Votre chiffre d'affaires sur 5 ans</h2>
       </div>
-      <p className="text-slate-400 text-sm">Choisissez votre méthode de saisie</p>
+      <p className="text-slate-400 text-sm">Évaluez vos revenus prévisionnels en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
 
       {/* Mode Selector Tabs */}
       <div className="flex bg-[#242b3d] border border-slate-800 rounded-2xl p-2 max-w-2xl">
@@ -67,17 +69,17 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
         <div>
           <h3 className="flex items-center gap-3 font-bold text-lg mb-6 border-b border-slate-800 pb-4">
             <i className="fa-solid fa-file-signature text-indigo-400"></i>
-            <span>Informations complémentaires</span>
+            <span>Détails opérationnels</span>
           </h3>
           <div className="space-y-6">
              <div>
                 <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">
-                   Description de votre chiffre d'affaires
+                   Description de votre modèle de revenus
                 </label>
                 <textarea 
                   rows={3}
                   className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none resize-none transition-all"
-                  placeholder="Ex: Année 1 : 50 clients/mois à 20 000 FCFA. Croissance de 10% grâce à l'ouverture d'une 2e agence en année 2..."
+                  placeholder={`Ex: Année 1 : Estimation basée sur 100 ventes/mois à un prix moyen unitaire en ${currency.symbol}...`}
                 />
              </div>
           </div>
@@ -87,7 +89,7 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
         <div>
           <h3 className="flex items-center gap-3 font-bold text-lg mb-6 border-b border-slate-800 pb-4">
             <i className="fa-solid fa-calendar-week text-indigo-400"></i>
-            <span>Chiffre d'affaires - Année 1</span>
+            <span>Détail Mensuel - Année 1 ({currency.symbol})</span>
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
             {data.caMensuel.map((val, i) => (
@@ -95,6 +97,7 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                 <label className="text-[10px] uppercase font-bold text-slate-600 block text-center">Mois {i+1}</label>
                 <input 
                   type="number" 
+                  step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                   value={val || ''} 
                   onChange={(e) => handleCaMensuelChange(i, e.target.value)}
                   className="w-full px-3 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white font-mono text-xs focus:border-indigo-500 outline-none text-right transition-all"
@@ -104,48 +107,22 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
           </div>
           <div className="mt-6 p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/20 flex justify-between items-center shadow-inner">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <i className="fa-solid fa-chart-simple text-indigo-400"></i> Total Année 1 estimé :
+              <i className="fa-solid fa-chart-simple text-indigo-400"></i> Total CA Année 1 :
             </span>
-            <span className="text-xl font-bold font-mono text-indigo-400">{totalYear1.toLocaleString()} FCFA</span>
+            <span className="text-xl font-bold font-mono text-indigo-400">{formatCurrency(totalYear1, currency)} {currency.code}</span>
           </div>
-        </div>
-
-        {/* Croissance */}
-        <div>
-           <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-4 uppercase tracking-widest">
-              Taux de croissance annuels souhaités (%)
-           </label>
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-             {data.tauxCroissance.map((t, i) => (
-                <div key={i} className="bg-[#1a1f2b] p-4 rounded-xl border border-slate-800 space-y-2 hover:border-indigo-500/50 transition-colors">
-                   <p className="text-[10px] font-bold text-slate-500 uppercase">Année {i+1} <i className="fa-solid fa-arrow-right-long mx-1 text-[8px]"></i> {i+2}</p>
-                   <div className="flex items-center gap-2">
-                      <input 
-                        type="number" 
-                        value={t} 
-                        onChange={(e) => handleTauxChange(i, e.target.value)}
-                        className="w-full bg-transparent border-none text-white font-bold p-0 focus:ring-0 text-xl outline-none"
-                      />
-                      <span className="text-indigo-500 font-bold">%</span>
-                   </div>
-                </div>
-             ))}
-           </div>
-           <button className="mt-8 px-6 py-2.5 bg-[#374151] hover:bg-slate-700 text-white font-bold rounded-xl text-xs flex items-center gap-3 transition-all active:scale-95">
-              <i className="fa-solid fa-calculator"></i> <span>Calculer les 5 années</span>
-           </button>
         </div>
 
         {/* Paramètres d'analyse */}
         <div className="pt-12 border-t border-slate-800">
           <h3 className="flex items-center gap-3 font-bold text-lg mb-8">
             <i className="fa-solid fa-magnifying-glass-chart text-indigo-400"></i>
-            <span>Analyse de rentabilité & trésorerie</span>
+            <span>Paramètres RH & Délais</span>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
              <div className="space-y-6">
                 <div>
-                   <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Coût d'achat des marchandises (% du CA)</label>
+                   <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Coût d'achat marchandises (% du CA)</label>
                    <div className="relative">
                       <input 
                         type="number" 
@@ -155,34 +132,11 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 font-bold">%</span>
                    </div>
-                  <p className="text-[10px] text-slate-600 mt-2 italic flex items-center gap-2">
-                    <i className="fa-solid fa-question-circle"></i> Quel est le coût d'achat de vos marchandises ?
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-                      <label className="text-[10px] font-bold text-slate-500 mb-2 block uppercase tracking-tight">Délai client (jours)</label>
-                      <input 
-                        type="number" 
-                        value={data.joursClients} 
-                        onChange={(e) => onUpdate({...data, joursClients: parseFloat(e.target.value) || 0})}
-                        className="w-full px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-xs text-center"
-                      />
-                   </div>
-                   <div>
-                      <label className="text-[10px] font-bold text-slate-500 mb-2 block uppercase tracking-tight">Délai fourniss. (jours)</label>
-                      <input 
-                        type="number" 
-                        value={data.joursFournisseurs} 
-                        onChange={(e) => onUpdate({...data, joursFournisseurs: parseFloat(e.target.value) || 0})}
-                        className="w-full px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-xs text-center"
-                      />
-                   </div>
                 </div>
              </div>
              
              <div className="space-y-6">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Salaires et rémunération du dirigeant</label>
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Masse salariale annuelle ({currency.symbol})</label>
                 <div className="overflow-x-auto rounded-xl border border-slate-800">
                    <table className="w-full text-[10px]">
                       <thead>
@@ -193,11 +147,12 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                       </thead>
                       <tbody>
                         <tr className="border-b border-slate-800/50">
-                           <td className="py-2 px-3 text-slate-400 font-medium">Salaires employés</td>
+                           <td className="py-2 px-3 text-slate-400 font-medium">Salariés</td>
                            {[0,1,2,3,4].map(idx => (
                               <td key={idx} className="p-1">
                                  <input 
                                    type="number" 
+                                   step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                                    value={data.salairesEmp[idx] || ''} 
                                    onChange={(e) => handleSalaryChange(idx, 'salairesEmp', e.target.value)}
                                    className="w-12 bg-[#1a1f2b] border border-slate-800 rounded p-1 text-center text-white focus:border-indigo-500 outline-none"
@@ -206,11 +161,12 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                            ))}
                         </tr>
                         <tr>
-                           <td className="py-2 px-3 text-slate-400 font-medium">Rémun. Dirigeant</td>
+                           <td className="py-2 px-3 text-slate-400 font-medium">Direction</td>
                            {[0,1,2,3,4].map(idx => (
                               <td key={idx} className="p-1">
                                  <input 
                                    type="number" 
+                                   step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                                    value={data.remunDir[idx] || ''} 
                                    onChange={(e) => handleSalaryChange(idx, 'remunDir', e.target.value)}
                                    className="w-12 bg-[#1a1f2b] border border-slate-800 rounded p-1 text-center text-white focus:border-indigo-500 outline-none"
@@ -220,13 +176,6 @@ const RevenueForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                         </tr>
                       </tbody>
                    </table>
-                </div>
-                <div className="flex items-center justify-between p-4 bg-[#1a1f2b] rounded-xl border border-slate-800 shadow-inner">
-                   <span className="text-xs text-slate-400 font-medium">Exonération ACCRE ?</span>
-                   <div className="flex bg-[#242b3d] p-1 rounded-lg">
-                      <button onClick={() => onUpdate({...data, accre: true})} className={`text-[10px] font-bold px-4 py-1.5 rounded-md transition-all ${data.accre ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>OUI</button>
-                      <button onClick={() => onUpdate({...data, accre: false})} className={`text-[10px] font-bold px-4 py-1.5 rounded-md transition-all ${!data.accre ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>NON</button>
-                   </div>
                 </div>
              </div>
           </div>

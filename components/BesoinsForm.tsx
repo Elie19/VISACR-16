@@ -1,16 +1,19 @@
 
 import React from 'react';
-import { Besoins, BesoinItem } from '../types';
-import { LISTE_BESOINS_KEYS } from '../constants';
+import { Besoins, BesoinItem, AppState } from '../types';
+import { LISTE_BESOINS_KEYS, formatCurrency } from '../constants';
 
 interface Props {
-  data: Besoins;
+  state: AppState;
   onUpdate: (data: Besoins) => void;
   onNext: () => void;
   onPrev: () => void;
 }
 
-const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
+const BesoinsForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
+  const data = state.besoins;
+  const currency = state.currency;
+  
   const handleItemChange = (id: string, field: 'montant' | 'details' | 'amortissement', value: any) => {
     const current = data[id] || { montant: 0, details: '', amortissement: LISTE_BESOINS_KEYS.find(k => k.id === id)?.defaultAmort || 0 };
     onUpdate({
@@ -29,14 +32,14 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
         </span>
         <h2 className="text-2xl font-bold text-white">1) Vos besoins de démarrage</h2>
       </div>
-      <p className="text-slate-400 text-sm">Listez toutes les dépenses ou investissements que vous devrez faire avant même de démarrer l'activité</p>
+      <p className="text-slate-400 text-sm">Listez toutes les dépenses nécessaires exprimées en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
          <div className="bg-orange-500/10 border-l-4 border-orange-500 p-4 m-8 flex items-start gap-3 rounded-r-xl">
             <i className="fa-solid fa-triangle-exclamation text-orange-500 mt-1"></i>
             <div>
-               <p className="text-sm font-bold text-orange-200">Important :</p>
-               <p className="text-xs text-orange-200/80">Cochez chaque poste de dépense que vous aurez à réaliser avant le démarrage de l'activité</p>
+               <p className="text-sm font-bold text-orange-200">Rappel monétaire :</p>
+               <p className="text-xs text-orange-200/80">Tous les montants saisis sont considérés comme étant en {currency.name} ({currency.symbol}).</p>
             </div>
          </div>
 
@@ -57,9 +60,10 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
               
               <div className="flex items-center gap-3">
                 <div className="w-40 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-mono font-bold">CFA</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-mono font-bold">{currency.symbol}</span>
                   <input 
                     type="number"
+                    step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                     placeholder="0"
                     value={data[item.id]?.montant || ''}
                     onChange={(e) => handleItemChange(item.id, 'montant', e.target.value)}
@@ -88,7 +92,7 @@ const BesoinsForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
           <div className="flex items-center gap-6">
              <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Besoins</p>
-                <p className="text-2xl font-mono font-bold text-indigo-400">{(total as any).toLocaleString('fr-FR')} <span className="text-xs">FCFA</span></p>
+                <p className="text-2xl font-mono font-bold text-indigo-400">{formatCurrency(total, currency)} <span className="text-xs">{currency.symbol}</span></p>
              </div>
           </div>
           <div className="flex gap-3">

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { FinancingSource, AppState, BesoinItem } from '../types';
+import { formatCurrency } from '../constants';
 
 interface Props {
   state: AppState;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
+  const currency = state.currency;
   const totalBesoins = (Object.values(state.besoins) as BesoinItem[]).reduce((acc, b) => acc + b.montant, 0);
   const totalFinancement = state.financements.reduce((acc, f) => acc + f.montant, 0);
   const equilibre = totalFinancement - totalBesoins;
@@ -44,7 +46,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
         </span>
         <h2 className="text-2xl font-bold text-white">2) Le financement de vos besoins de démarrage</h2>
       </div>
-      <p className="text-slate-400 text-sm">Renseignez toutes vos sources de financement</p>
+      <p className="text-slate-400 text-sm">Précisez l'origine de vos fonds exprimés en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
@@ -52,7 +54,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
             <thead>
               <tr className="bg-[#1a1f2b] border-b border-slate-800">
                 <th className="p-4 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sources de financement</th>
-                <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Montant (FCFA)</th>
+                <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Montant ({currency.symbol})</th>
                 <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Taux (%)</th>
                 <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Durée (mois)</th>
                 <th className="p-4 w-12"></th>
@@ -83,6 +85,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                   <td className="p-4">
                     <input 
                       type="number" 
+                      step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                       value={f.montant || ''} 
                       onChange={(e) => updateSource(f.id, 'montant', e.target.value)}
                       className="w-full text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white font-mono text-sm focus:border-indigo-500 outline-none transition-all"
@@ -124,16 +127,16 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
               <div className="space-y-4 flex-1">
                  <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400">Total besoins :</span>
-                    <span className="font-mono font-bold text-indigo-400">{totalBesoins.toLocaleString()} FCFA</span>
+                    <span className="font-mono font-bold text-indigo-400">{formatCurrency(totalBesoins, currency)} {currency.symbol}</span>
                  </div>
                  <div className="flex justify-between items-center text-sm">
                     <span className="text-slate-400">Total financement :</span>
-                    <span className="font-mono font-bold text-indigo-400">{totalFinancement.toLocaleString()} FCFA</span>
+                    <span className="font-mono font-bold text-indigo-400">{formatCurrency(totalFinancement, currency)} {currency.symbol}</span>
                  </div>
                  <div className="flex justify-between items-center pt-4 border-t border-slate-800 font-bold">
                     <span className="text-white uppercase tracking-widest text-xs">Équilibre :</span>
                     <span className={equilibre >= 0 ? 'text-emerald-400' : 'text-red-400'}>
-                       {equilibre === 0 ? 'Parfaitement équilibré' : `${equilibre.toLocaleString()} FCFA`}
+                       {equilibre === 0 ? 'Parfaitement équilibré' : `${formatCurrency(equilibre, currency)} ${currency.symbol}`}
                     </span>
                  </div>
               </div>

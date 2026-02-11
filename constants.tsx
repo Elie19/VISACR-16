@@ -1,16 +1,36 @@
 
 import React from 'react';
-import { StepId } from './types';
+import { StepId, Currency } from './types';
 
 export const STEPS = [
-  { id: StepId.WELCOME, label: 'Accueil', icon: '' },
-  { id: StepId.INFOS, label: 'Identité', icon: '' },
-  { id: StepId.BESOINS, label: 'Besoins', icon: '' },
-  { id: StepId.FINANCEMENT, label: 'Financement', icon: '' },
-  { id: StepId.CHARGES, label: 'Charges', icon: '' },
-  { id: StepId.REVENUE, label: 'Chiffre d’affaires', icon: '' },
-  { id: StepId.REPORT, label: 'Rapport', icon: '' },
+  { id: StepId.WELCOME, label: 'Accueil', icon: 'fa-house' },
+  { id: StepId.INFOS, label: 'Identité', icon: 'fa-user-tie' },
+  { id: StepId.BESOINS, label: 'Besoins', icon: 'fa-list-check' },
+  { id: StepId.FINANCEMENT, label: 'Financement', icon: 'fa-hand-holding-dollar' },
+  { id: StepId.CHARGES, label: 'Charges', icon: 'fa-file-invoice-dollar' },
+  { id: StepId.REVENUE, label: 'Chiffre d’affaires', icon: 'fa-arrow-up-right-dots' },
+  { id: StepId.REPORT, label: 'Rapport', icon: 'fa-file-contract' },
 ];
+
+export const SUPPORTED_CURRENCIES: Currency[] = [
+  { code: 'XOF', name: 'Franc CFA (BCEAO)', symbol: 'FCFA', decimals: 0, locale: 'fr-SN' },
+  { code: 'XAF', name: 'Franc CFA (BEAC)', symbol: 'FCFA', decimals: 0, locale: 'fr-CM' },
+  { code: 'EUR', name: 'Euro', symbol: '€', decimals: 2, locale: 'fr-FR' },
+  { code: 'USD', name: 'Dollar américain', symbol: '$', decimals: 2, locale: 'en-US' },
+  { code: 'MAD', name: 'Dirham marocain', symbol: 'DH', decimals: 2, locale: 'ar-MA' },
+  { code: 'GNF', name: 'Franc guinéen', symbol: 'FG', decimals: 0, locale: 'fr-GN' },
+  { code: 'CAD', name: 'Dollar canadien', symbol: 'C$', decimals: 2, locale: 'fr-CA' },
+];
+
+/**
+ * Formate un montant selon les standards de la devise sélectionnée
+ */
+export const formatCurrency = (amount: number, currency: Currency): string => {
+  return new Intl.NumberFormat(currency.locale, {
+    minimumFractionDigits: currency.decimals,
+    maximumFractionDigits: currency.decimals,
+  }).format(amount);
+};
 
 export const LISTE_BESOINS_KEYS = [
   { id: 'frais-etablissement', label: "Frais d'établissement", defaultAmort: 5 },

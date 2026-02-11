@@ -5,6 +5,14 @@ export enum ActivityType {
   MIXTE = 'mixte'
 }
 
+export interface Currency {
+  code: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  locale: string;
+}
+
 export interface GeneralInfo {
   prenomNom: string;
   intituleProjet: string;
@@ -61,6 +69,7 @@ export interface RevenueState {
 
 export interface AppState {
   generalInfo: GeneralInfo;
+  currency: Currency;
   besoins: Besoins;
   financements: FinancingSource[];
   charges: ChargeAnnee;

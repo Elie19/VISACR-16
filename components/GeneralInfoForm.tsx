@@ -1,16 +1,25 @@
 
 import React from 'react';
-import { GeneralInfo, ActivityType } from '../types';
+import { GeneralInfo, ActivityType, Currency, AppState } from '../types';
+import { SUPPORTED_CURRENCIES } from '../constants';
 
 interface Props {
-  data: GeneralInfo;
+  state: AppState;
   onUpdate: (data: GeneralInfo) => void;
+  onUpdateCurrency: (currency: Currency) => void;
   onNext: () => void;
 }
 
-const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
+const GeneralInfoForm: React.FC<Props> = ({ state, onUpdate, onUpdateCurrency, onNext }) => {
+  const data = state.generalInfo;
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     onUpdate({ ...data, [e.target.name]: e.target.value });
+  };
+
+  const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selected = SUPPORTED_CURRENCIES.find(c => c.code === e.target.value);
+    if (selected) onUpdateCurrency(selected);
   };
 
   const InputLabel = ({ iconClass, label }: { iconClass: string, label: string }) => (
@@ -28,7 +37,7 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
         </span>
         <h2 className="text-2xl font-bold text-white">A. Informations générales</h2>
       </div>
-      <p className="text-slate-400 text-sm">Renseignez les informations de base de votre projet</p>
+      <p className="text-slate-400 text-sm">Renseignez les informations de base de votre projet et la devise de référence.</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl p-8 shadow-2xl">
         <div className="flex items-center gap-2 mb-8 border-b border-slate-800 pb-4">
@@ -92,26 +101,16 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
               </select>
             </div>
             <div>
-              <InputLabel iconClass="fa-solid fa-phone" label="Votre numéro de téléphone" />
-              <input 
-                type="tel" 
-                name="telephone" 
-                value={data.telephone} 
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600"
-                placeholder="Ex: +221 77 123 45 67"
-              />
-            </div>
-            <div>
-              <InputLabel iconClass="fa-solid fa-envelope" label="Votre adresse e-mail" />
-              <input 
-                type="email" 
-                name="email" 
-                value={data.email} 
-                onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600"
-                placeholder="Ex: contact@monprojet.com"
-              />
+              <InputLabel iconClass="fa-solid fa-money-bill-wave" label="Devise du projet" />
+              <select 
+                value={state.currency.code} 
+                onChange={handleCurrencyChange}
+                className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
+              >
+                {SUPPORTED_CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.name} ({c.symbol})</option>
+                ))}
+              </select>
             </div>
             <div>
               <InputLabel iconClass="fa-solid fa-location-dot" label="Votre ville d'activité" />
@@ -123,12 +122,6 @@ const GeneralInfoForm: React.FC<Props> = ({ data, onUpdate, onNext }) => {
                 className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-600"
                 placeholder="Ex: Dakar"
               />
-            </div>
-            <div>
-              <InputLabel iconClass="fa-solid fa-money-bill-wave" label="Votre devise" />
-              <div className="w-full px-4 py-3 rounded-xl bg-[#1a1f2b] border border-slate-700 text-slate-400 flex items-center gap-2">
-                 <i className="fa-solid fa-coins text-emerald-500"></i> Franc CFA (FCFA)
-              </div>
             </div>
           </div>
 

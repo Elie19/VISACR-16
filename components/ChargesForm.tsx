@@ -1,16 +1,19 @@
 
 import React from 'react';
-import { ChargeAnnee } from '../types';
-import { LISTE_CHARGES_KEYS } from '../constants';
+import { ChargeAnnee, AppState } from '../types';
+import { LISTE_CHARGES_KEYS, formatCurrency } from '../constants';
 
 interface Props {
-  data: ChargeAnnee;
+  state: AppState;
   onUpdate: (data: ChargeAnnee) => void;
   onNext: () => void;
   onPrev: () => void;
 }
 
-const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
+const ChargesForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
+  const data = state.charges;
+  const currency = state.currency;
+
   const handleChargeChange = (chargeId: string, annee: number, val: string) => {
     onUpdate({ ...data, [`${chargeId}-${annee}`]: parseFloat(val) || 0 });
   };
@@ -27,7 +30,7 @@ const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
         </span>
         <h2 className="text-2xl font-bold text-white">3) Vos charges fixes</h2>
       </div>
-      <p className="text-slate-400 text-sm">Les charges courantes récurrentes, hors taxes</p>
+      <p className="text-slate-400 text-sm">Les charges courantes récurrentes du projet en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
 
       <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
@@ -52,9 +55,10 @@ const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
                   {[0, 1, 2, 3, 4].map(aIdx => (
                     <td key={aIdx} className="p-2">
                       <div className="relative group">
-                         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600 font-mono opacity-0 group-focus-within:opacity-100 transition-opacity">FCFA</span>
+                         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[8px] text-slate-600 font-mono opacity-0 group-focus-within:opacity-100 transition-opacity">{currency.symbol}</span>
                          <input 
                            type="number"
+                           step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                            placeholder="0"
                            value={data[`${charge.id}-${aIdx}`] || ''}
                            onChange={(e) => handleChargeChange(charge.id, aIdx, e.target.value)}
@@ -69,11 +73,11 @@ const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
               {/* Total Row */}
               <tr className="bg-[#1a1f2b] font-bold">
                 <td className="p-4 uppercase text-[10px] tracking-[0.2em] text-white">
-                   <i className="fa-solid fa-sigma mr-2 text-indigo-500"></i> TOTAL
+                   <i className="fa-solid fa-sigma mr-2 text-indigo-500"></i> TOTAL ({currency.code})
                 </td>
                 {[0, 1, 2, 3, 4].map(aIdx => (
                   <td key={aIdx} className="p-4 text-right font-mono text-indigo-400 border-l border-slate-800/50">
-                    {getAnneeTotal(aIdx).toLocaleString()}
+                    {formatCurrency(getAnneeTotal(aIdx), currency)}
                   </td>
                 ))}
               </tr>
@@ -86,7 +90,7 @@ const ChargesForm: React.FC<Props> = ({ data, onUpdate, onNext, onPrev }) => {
               <span className="w-8 h-8 flex items-center justify-center bg-indigo-500/10 rounded-lg text-indigo-400">
                 <i className="fa-solid fa-lightbulb"></i>
               </span>
-              <p>CFE = Cotisation Foncière des Entreprises (taxe annuelle)</p>
+              <p>Tous les montants sont calculés selon la précision financière de votre devise ({currency.decimals} décimales).</p>
            </div>
            <button className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-3 transition-all active:scale-95">
               <i className="fa-solid fa-calculator"></i> <span>Calculer les totaux par année</span>
