@@ -44,7 +44,22 @@ const App: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<StepId>(StepId.WELCOME);
   const [state, setState] = useState<AppState>(() => {
     const saved = localStorage.getItem('financeStart_state');
-    return saved ? JSON.parse(saved) : INITIAL_STATE;
+    if (!saved) return INITIAL_STATE;
+    
+    try {
+      const parsed = JSON.parse(saved);
+      // Sécurisation : on fusionne l'état sauvegardé avec l'état initial pour garantir la présence des nouvelles clés
+      return {
+        ...INITIAL_STATE,
+        ...parsed,
+        generalInfo: { ...INITIAL_STATE.generalInfo, ...parsed.generalInfo },
+        currency: parsed.currency || INITIAL_STATE.currency,
+        revenue: { ...INITIAL_STATE.revenue, ...parsed.revenue },
+      };
+    } catch (e) {
+      console.error("Erreur lors du parsing du localStorage", e);
+      return INITIAL_STATE;
+    }
   });
   const [isDarkMode, setIsDarkMode] = useState(true);
 
@@ -108,7 +123,7 @@ const App: React.FC = () => {
               <i className="fa-solid fa-chart-pie text-sm"></i>
             </div>
             <span className="font-poppins font-bold text-xl tracking-tight">FinanceStart</span>
-            <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">{state.currency.code}</span>
+            <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">{state.currency?.code || '...'}</span>
           </div>
 
           <nav className="hidden lg:flex items-center gap-2">
@@ -148,7 +163,7 @@ const App: React.FC = () => {
               <p className="leading-relaxed">Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
               <div className="flex items-center gap-2">
                  <i className="fa-solid fa-money-bill-transfer text-indigo-400"></i>
-                 <p>Projet configuré en <span className="text-white font-bold">{state.currency.name} ({state.currency.code})</span></p>
+                 <p>Projet configuré en <span className="text-white font-bold">{state.currency?.name || 'Franc CFA'} ({state.currency?.code || 'XOF'})</span></p>
               </div>
             </div>
             <div className="space-y-4">
@@ -158,7 +173,7 @@ const App: React.FC = () => {
             </div>
             <div className="space-y-4">
               <h3 className="font-bold text-white uppercase text-xs tracking-widest">Standardisation</h3>
-              <p className="text-[10px] leading-tight opacity-60">Formatage monétaire conforme à la norme ISO 4217. Précision de {state.currency.decimals} décimales pour le contexte {state.currency.code}.</p>
+              <p className="text-[10px] leading-tight opacity-60">Formatage monétaire conforme à la norme ISO 4217. Précision de {state.currency?.decimals || 0} décimales pour le contexte {state.currency?.code || 'XOF'}.</p>
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-center gap-4">

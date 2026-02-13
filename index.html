@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -19,9 +18,75 @@
             font-family: 'Poppins', sans-serif;
         }
         @media print {
+            /* Suppression des éléments web */
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .page-break { page-break-before: always; }
+            
+            /* Configuration de la page */
+            @page {
+                margin: 1.5cm;
+                size: A4 portrait;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .print-only { 
+                display: block !important; 
+            }
+
+            /* Forçage de saut de page */
+            .page-break { 
+                page-break-before: always !important; 
+                break-before: page !important;
+                margin-top: 0 !important;
+            }
+
+            /* Empêcher les coupures malheureuses */
+            .avoid-break { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important;
+            }
+
+            /* Gestion des tableaux */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                page-break-inside: auto !important;
+                margin-bottom: 1rem !important;
+            }
+            
+            thead {
+                display: table-header-group !important;
+            }
+
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+
+            /* Correction des titres isolés */
+            h2, h3 {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+
+            /* Réduction des paddings excessifs en impression */
+            .p-12 { padding: 1rem !important; }
+            .p-16 { padding: 2rem !important; }
+            .mb-10 { margin-bottom: 1.5rem !important; }
+            .my-10 { margin-top: 1rem !important; margin-bottom: 1rem !important; }
+            
+            /* Sécurité contre les pages blanches */
+            .min-h-\[95vh\] {
+                min-height: auto !important;
+                height: 90vh !important; /* Pour la page de garde uniquement */
+            }
         }
     </style>
 <script type="importmap">
