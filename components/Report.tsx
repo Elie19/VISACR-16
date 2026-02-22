@@ -35,9 +35,11 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
       }
     }
 
+    const results: any[] = [];
     let cumulCaf = 0;
+    let prevBfr = 0;
 
-    return years.map((y, idx) => {
+    years.forEach((y, idx) => {
       const ca = caArr[idx] || 0;
       const costOfGoods = ca * ((state.revenue?.tauxCoutMarchandises || 0) / 100);
       const margin = ca - costOfGoods;
@@ -61,13 +63,16 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
 
       const dotAmort = Object.values(amortDetails).reduce((a, b) => a + b, 0);
 
-      const interestRate = (state.financements || [])
-        .filter(f => f.taux && f.taux > 0)
-        .reduce((acc, f) => acc + (f.montant * (f.taux || 0) / 100), 0);
-      
-      const chargesFin = Math.max(0, interestRate * (1 - (idx * 0.2)));
-      
+      // Calcul des intérêts (dégressifs simplifiés sur 5 ans)
       const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined).reduce((a, f) => a + f.montant, 0);
+      const avgInterestRate = (state.financements || [])
+        .filter(f => f.taux && f.taux > 0)
+        .reduce((acc, f) => acc + (f.montant * (f.taux || 0) / 100), 0) / (totalEmprunts || 1);
+      
+      // Capital restant dû estimé
+      const capitalRestantDu = Math.max(0, totalEmprunts * (1 - (idx * 0.2)));
+      const chargesFin = capitalRestantDu * avgInterestRate;
+      
       const remboursementEmprunt = idx < 5 ? totalEmprunts / 5 : 0;
 
       const va = margin - fixedCosts;
@@ -87,15 +92,19 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
       const creditClient = ca * ((state.revenue?.joursClients || 0) / 360);
       const detteFournisseur = costOfGoods * ((state.revenue?.joursFournisseurs || 0) / 360);
       const bfr = creditClient - detteFournisseur;
+      const bfrVariation = bfr - prevBfr;
+      prevBfr = bfr;
 
       const tauxMarge = ca > 0 ? (margin / ca) : 0;
-      const chargesFixesTotales = fixedCosts + totalSalairesEtCharges;
+      const chargesFixesTotales = fixedCosts + totalSalairesEtCharges + dotAmort + chargesFin;
       const seuilRentabilite = tauxMarge > 0 ? chargesFixesTotales / tauxMarge : 0;
 
       cumulCaf += caf;
+      
+      // Solde de trésorerie : Tréso Initiale + CAF cumulée - BFR (stock de tréso) - Remboursements cumulés
       const soldeTresorerieFinAnnee = tresorerieInitiale + cumulCaf - bfr - (remboursementEmprunt * (idx + 1));
 
-      return {
+      results.push({
         year: idx + 1,
         ca,
         costOfGoods,
@@ -108,6 +117,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
         remunDir: state.revenue?.remunDir?.[idx] || 0,
         chargesSocDir,
         chargesSocEmp,
+        totalSalairesEtCharges,
         ebe,
         dotAmort,
         resExploit,
@@ -120,25 +130,32 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
         creditClient,
         detteFournisseur,
         bfr,
+        bfrVariation,
         seuilRentabilite,
         tauxMarge,
         soldeTresorerieFinAnnee
-      };
+      });
     });
+    return results;
   }, [state, years, tresorerieInitiale]);
 
   // --- CALCULS MENSUELS ANNEE 1 POUR LE BUDGET ---
   const monthlyDataYear1 = useMemo(() => {
     let soldeCumule = tresorerieInitiale;
+    const year1Data = financialData[0];
+    
     return months.map(m => {
       const ca = state.revenue?.caMensuel?.[m] || 0;
       const costOfGoods = ca * ((state.revenue?.tauxCoutMarchandises || 0) / 100);
-      const fixedCharges = LISTE_CHARGES_KEYS.reduce((acc, c) => acc + (state.charges?.[`${c.id}-0`] || 0) / 12, 0);
-      const salaires = (state.revenue?.salairesEmp?.[0] || 0) / 12 + (state.revenue?.remunDir?.[0] || 0) / 12;
-      const chargesSoc = salaires * 0.20; 
+      
+      // Répartition mensuelle des charges fixes et salaires
+      const fixedCharges = (year1Data?.fixedCosts || 0) / 12;
+      const salairesEtCharges = (year1Data?.totalSalairesEtCharges || 0) / 12;
+      const chargesFinancieres = (year1Data?.chargesFin || 0) / 12;
+      const remboursement = (year1Data?.remboursementEmprunt || 0) / 12;
 
       const encaissements = ca;
-      const decaissements = costOfGoods + fixedCharges + salaires + chargesSoc;
+      const decaissements = costOfGoods + fixedCharges + salairesEtCharges + chargesFinancieres + remboursement;
       const fluxMois = encaissements - decaissements;
       soldeCumule += fluxMois;
 
@@ -146,17 +163,19 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
         mois: m + 1,
         encaissements,
         decaissements,
+        costOfGoods,
+        fixedCharges,
+        salairesEtCharges,
         fluxMois,
         soldeCumule
       };
     });
-  }, [state, tresorerieInitiale]);
+  }, [state, tresorerieInitiale, financialData]);
 
   if (!currency) return <div className="p-20 text-center">Chargement des données monétaires...</div>;
 
   const formatVal = (v: number) => (v === 0 ? '-' : formatCurrency(v, currency));
 
-  // Helper for Section Headers in Print
   const PrintSectionHeader = ({ title }: { title: string }) => (
     <div className="border-4 border-black p-4 mb-4 text-center bg-white avoid-break">
       <h2 className="text-2xl font-bold uppercase tracking-wide">{title}</h2>
@@ -274,7 +293,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                     <td className="border-2 border-black p-1.5 text-[10px]">Immobilisations incorporelles</td>
                     <td className="border-2 border-black p-1.5 text-right text-[10px]">-</td>
                   </tr>
-                  {LISTE_BESOINS_KEYS.filter(k => k.id.includes('frais') || k.id.includes('logiciels') || k.id.includes('droit') || k.id.includes('caution') || k.id.includes('depot')).map(k => (
+                  {LISTE_BESOINS_KEYS.filter(k => k.id.includes('frais') || k.id.includes('logiciels') || k.id.includes('droit') || k.id.includes('caution') || k.id.includes('depot') || k.id.includes('achat-fonds-commerce')).map(k => (
                     <tr key={k.id}>
                       <td className="border-x-2 border-black p-1 text-[9px] pl-6 italic">{k.label}</td>
                       <td className="border-x-2 border-black p-1 text-right text-[9px] font-mono">{state.besoins?.[k.id]?.montant ? formatVal(state.besoins[k.id].montant) : '-'}</td>
@@ -395,14 +414,14 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1" colSpan={6}>Amortissements incorporels</td></tr>
-                {LISTE_BESOINS_KEYS.filter(k => k.defaultAmort > 0 && (k.id.includes('frais') || k.id.includes('logiciels'))).map(k => (
+                <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1" colSpan={6}>Amortissements incorporelles</td></tr>
+                {LISTE_BESOINS_KEYS.filter(k => k.defaultAmort > 0 && (k.id.includes('frais') || k.id.includes('logiciels') || k.id.includes('droit') || k.id.includes('achat-fonds-commerce'))).map(k => (
                   <tr key={k.id}>
                     <td className="border-2 border-black p-1 pl-4 italic">{k.label}</td>
                     {financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.amortDetails?.[k.id] || 0)}</td>)}
                   </tr>
                 ))}
-                <tr className="bg-slate-100 font-bold border-t-2 border-black"><td className="border-2 border-black p-1" colSpan={6}>Amortissements corporels</td></tr>
+                <tr className="bg-slate-100 font-bold border-t-2 border-black"><td className="border-2 border-black p-1" colSpan={6}>Amortissements corporelles</td></tr>
                 {LISTE_BESOINS_KEYS.filter(k => k.defaultAmort > 0 && (k.id.includes('achat-immo') || k.id.includes('travaux') || k.id.includes('materiel') || k.id.includes('enseigne'))).map(k => (
                   <tr key={k.id}>
                     <td className="border-2 border-black p-1 pl-4 italic">{k.label}</td>
@@ -440,7 +459,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                 
                 <tr className="bg-slate-50 font-bold">
                    <td className="border-2 border-black p-1">Charges d'exploitation</td>
-                   {financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods + d.fixedCosts + d.salairesEmp + d.remunDir + d.chargesSocDir + d.chargesSocEmp)}</td>)}
+                   {financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges)}</td>)}
                 </tr>
                 <tr><td className="border-2 border-black p-1 pl-4 italic">Achats consommés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Marge brute</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td>)}</tr>
@@ -454,14 +473,14 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                 ))}
 
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Valeur ajoutée</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.va)}</td>)}</tr>
-                <tr><td className="border-2 border-black p-1 pl-4 italic">Impôts et taxes</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">-</td>)}</tr>
-                <tr><td className="border-2 border-black p-1 pl-4 italic">Salaires employés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.salairesEmp)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1 pl-4 italic">Salaires et charges sociales</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.totalSalairesEtCharges)}</td>)}</tr>
                 <tr className="bg-slate-300 font-black"><td className="border-2 border-black p-1 uppercase">Excédent brut d'exploitation</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.ebe)}</td>)}</tr>
                 
                 <tr><td className="border-2 border-black p-1 pl-4 italic">Frais bancaires, charges financières</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.chargesFin)}</td>)}</tr>
                 <tr><td className="border-2 border-black p-1 pl-4 italic">Dotations aux amortissements</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.dotAmort)}</td>)}</tr>
                 
                 <tr className="bg-slate-400 text-white font-black"><td className="border-2 border-white p-1 uppercase">Résultat avant impôts</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.resAvantImpots)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1 pl-4 italic">Impôts sur les sociétés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.is)}</td>)}</tr>
                 <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Résultat net comptable</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.netResult)}</td>)}</tr>
              </tbody>
           </table>
@@ -502,10 +521,10 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr><td className="border-2 border-black p-1.5">Résultat de l'exercice</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.netResult)}</td>)}</tr>
-                <tr><td className="border-2 border-black p-1.5 italic">+ Dotation amortissements</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.dotAmort)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1.5">Résultat net de l'exercice</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.netResult)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1.5 italic">+ Dotation aux amortissements</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.dotAmort)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1.5 uppercase">Capacité d'autofinancement</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
-                <tr><td className="border-2 border-black p-1.5 italic">- Remboursement emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1.5 italic">- Remboursement d'emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
                 <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1.5 uppercase">Autofinancement net</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1.5 text-right font-mono">{formatVal(d.caf - d.remboursementEmprunt)}</td>)}</tr>
               </tbody>
             </table>
@@ -531,7 +550,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
                 <tr><td className="border-2 border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td>)}</tr>
                 <tr className="bg-slate-100 font-bold border-t-2 border-black"><td className="border-2 border-black p-1">Marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Taux de marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-center font-mono">{(d.tauxMarge * 100).toFixed(0)}%</td>)}</tr>
-                <tr><td className="border-2 border-black p-1 italic">Coûts fixes</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fixedCosts + d.salairesEmp + d.remunDir + d.chargesSocDir + d.chargesSocEmp)}</td>)}</tr>
+                <tr><td className="border-2 border-black p-1 italic">Coûts fixes (incl. amort. & fin.)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fixedCosts + d.totalSalairesEtCharges + d.dotAmort + d.chargesFin)}</td>)}</tr>
                 <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Seuil de rentabilité (chiffre d'affaires)</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.seuilRentabilite)}</td>)}</tr>
               </tbody>
             </table>
@@ -580,17 +599,19 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
               </tr>
             </thead>
             <tbody>
-              <tr><td className="border-2 border-black p-1">Immobilisations (investissements)</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal(totalInvestissement)}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Variation du Besoin en fonds de roulement</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.bfr)}</td>)}</tr>
+              <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={6}>Emplois (Besoins)</td></tr>
+              <tr><td className="border-2 border-black p-1">Investissements (Immobilisations)</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal(totalInvestissement)}</td><td colSpan={4} className="border-2 border-black"></td></tr>
+              <tr><td className="border-2 border-black p-1">Variation du BFR</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.bfrVariation)}</td>)}</tr>
               <tr><td className="border-2 border-black p-1">Remboursement d'emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
-              <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des besoins</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalInvestissement : 0) + d.bfr + d.remboursementEmprunt)}</td>)}</tr>
+              <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des emplois</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalInvestissement : 0) + d.bfrVariation + d.remboursementEmprunt)}</td>)}</tr>
               
-              <tr className="border-t-4 border-black"><td className="border-2 border-black p-1">Apport personnel</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => !f.taux).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Emprunts</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.taux).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Capacité d'auto-financement</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
+              <tr className="bg-slate-50 font-bold border-t-4 border-black"><td className="border-2 border-black p-1 uppercase" colSpan={6}>Ressources</td></tr>
+              <tr><td className="border-2 border-black p-1">Apports personnels</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => !f.tau).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
+              <tr><td className="border-2 border-black p-1">Emprunts bancaires</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.taux).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
+              <tr><td className="border-2 border-black p-1">Capacité d'autofinancement (CAF)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
               <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des ressources</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalFinancement : 0) + d.caf)}</td>)}</tr>
               
-              <tr className="bg-black text-white font-black border-t-2 border-white"><td className="border-2 border-white p-1 uppercase">Excédent de trésorerie</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}</tr>
+              <tr className="bg-black text-white font-black border-t-2 border-white"><td className="border-2 border-white p-1 uppercase">Solde de trésorerie annuel</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}</tr>
             </tbody>
           </table>
           <p className="text-right w-full text-xs font-bold mt-4 italic">7</p>
@@ -611,13 +632,13 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
             </thead>
             <tbody>
               <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={7}>Encaissements</td></tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Vente de marchandises / services</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}</tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Ventes de marchandises / services</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}</tr>
               <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des encaissements</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}</tr>
               
               <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={7}>Décaissements</td></tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Achats de marchandises</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements * 0.6)}</td>)}</tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Charges externes (fixes)</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements * 0.2)}</td>)}</tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Salaires et charges sociales</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements * 0.2)}</td>)}</tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Achats consommés</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td>)}</tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Charges externes</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fixedCharges)}</td>)}</tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Salaires et charges sociales</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.salairesEtCharges)}</td>)}</tr>
               <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des décaissements</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements)}</td>)}</tr>
               
               <tr className="border-t-2 border-black bg-slate-200 font-black"><td className="border-2 border-black p-1">Solde du mois</td>{monthlyDataYear1.slice(0,6).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fluxMois)}</td>)}</tr>
@@ -645,7 +666,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
             </thead>
             <tbody>
               <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={8}>Encaissements</td></tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Vente de marchandises / services</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(financialData[0]?.ca || 0) || '-'}</td></tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Ventes de marchandises / services</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(financialData[0]?.ca || 0) || '-'}</td></tr>
               
               <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={8}>Décaissements</td></tr>
               <tr><td className="border-2 border-black p-1 italic pl-4">Total décaissements mensuels</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(monthlyDataYear1.reduce((a,d)=>a+d.decaissements,0)) || '-'}</td></tr>

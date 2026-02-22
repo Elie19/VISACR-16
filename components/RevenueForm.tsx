@@ -133,6 +133,30 @@ const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 font-bold">%</span>
                    </div>
                 </div>
+                
+                <div className="pt-6 border-t border-slate-800/50">
+                   <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Délais de paiement (BFR)</h4>
+                   <div className="grid grid-cols-2 gap-6">
+                      <div>
+                         <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Délai clients (jours)</label>
+                         <input 
+                           type="number" 
+                           value={data.joursClients} 
+                           onChange={(e) => onUpdate({...data, joursClients: parseInt(e.target.value) || 0})}
+                           className="w-full px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none"
+                         />
+                      </div>
+                      <div>
+                         <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Délai fournisseurs (jours)</label>
+                         <input 
+                           type="number" 
+                           value={data.joursFournisseurs} 
+                           onChange={(e) => onUpdate({...data, joursFournisseurs: parseInt(e.target.value) || 0})}
+                           className="w-full px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none"
+                         />
+                      </div>
+                   </div>
+                </div>
              </div>
              
              <div className="space-y-6">
