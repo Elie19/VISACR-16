@@ -109,20 +109,20 @@ const App: React.FC = () => {
       case StepId.FINANCEMENT: return <FinancementForm state={state} onUpdate={(v) => updateState('financements', v)} onNext={nextStep} onPrev={prevStep} />;
       case StepId.CHARGES: return <ChargesForm state={state} onUpdate={(v) => updateState('charges', v)} onNext={nextStep} onPrev={prevStep} />;
       case StepId.REVENUE: return <RevenueForm state={state} onUpdate={(v) => updateState('revenue', v)} onNext={nextStep} onPrev={prevStep} onReset={resetAll} />;
-      case StepId.REPORT: return <Report state={state} onPrev={prevStep} onReset={resetAll} />;
+      case StepId.REPORT: return <Report state={state} onPrev={prevStep} onReset={resetAll} isDarkMode={isDarkMode} />;
       default: return null;
     }
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans ${isDarkMode ? 'dark bg-[#1a1f2b] text-white' : 'bg-slate-50 text-slate-900'}`}>
-      <header className={`sticky top-0 z-50 border-b ${isDarkMode ? 'bg-[#242b3d] border-slate-700' : 'bg-white border-slate-200'} no-print`}>
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${isDarkMode ? 'dark bg-[#1a1f2b] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <header className={`sticky top-0 z-50 border-b transition-colors duration-300 ${isDarkMode ? 'bg-[#242b3d] border-slate-700' : 'bg-white border-slate-200'} no-print`}>
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigateTo(StepId.WELCOME)}>
             <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg">
               <i className="fa-solid fa-chart-pie text-sm"></i>
             </div>
-            <span className="font-poppins font-bold text-xl tracking-tight">FinanceStart</span>
+            <span className={`font-poppins font-bold text-xl tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>FinanceStart</span>
             <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-bold uppercase ml-1">{state.currency?.code || '...'}</span>
           </div>
 
@@ -133,8 +133,8 @@ const App: React.FC = () => {
                 onClick={() => navigateTo(s.id as StepId)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   currentStep === s.id 
-                  ? 'bg-[#374151] text-white shadow-sm' 
-                  : 'text-slate-400 hover:text-white'
+                  ? (isDarkMode ? 'bg-[#374151] text-white shadow-sm' : 'bg-slate-100 text-indigo-600 shadow-sm')
+                  : (isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900')
                 }`}
               >
                 <i className={`fa-solid ${s.icon} text-xs`}></i>
@@ -155,33 +155,33 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      <footer className={`mt-auto border-t py-12 ${isDarkMode ? 'bg-[#1a1f2b] border-slate-800' : 'bg-white border-slate-200'} no-print`}>
+      <footer className={`mt-auto border-t py-12 transition-colors duration-300 ${isDarkMode ? 'bg-[#1a1f2b] border-slate-800' : 'bg-white border-slate-200'} no-print`}>
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-sm text-slate-400">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-sm text-slate-500 dark:text-slate-400">
             <div className="space-y-4">
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">FinanceStart</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase text-xs tracking-widest">FinanceStart</h3>
               <p className="leading-relaxed">Votre partenaire pour une gestion financière sereine dès le démarrage de votre projet.</p>
               <div className="flex items-center gap-2">
                  <i className="fa-solid fa-money-bill-transfer text-indigo-400"></i>
-                 <p>Projet configuré en <span className="text-white font-bold">{state.currency?.name || 'Franc CFA'} ({state.currency?.code || 'XOF'})</span></p>
+                 <p>Projet configuré en <span className="text-slate-900 dark:text-white font-bold">{state.currency?.name || 'Franc CFA'} ({state.currency?.code || 'XOF'})</span></p>
               </div>
             </div>
             <div className="space-y-4">
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">Contact</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase text-xs tracking-widest">Contact</h3>
               <p className="flex items-center gap-2"><i className="fa-solid fa-envelope w-4"></i> contact@financestart.fr</p>
               <p className="flex items-center gap-2"><i className="fa-solid fa-phone w-4"></i> +221 33 123 45 67</p>
             </div>
             <div className="space-y-4">
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">Standardisation</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white uppercase text-xs tracking-widest">Standardisation</h3>
               <p className="text-[10px] leading-tight opacity-60">Formatage monétaire conforme à la norme ISO 4217. Précision de {state.currency?.decimals || 0} décimales pour le contexte {state.currency?.code || 'XOF'}.</p>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-center gap-4">
+          <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-center gap-4">
             <p>© {new Date().getFullYear()} FinanceStart. Tous droits réservés.</p>
-            <button onClick={resetAll} className="hover:text-red-400 transition-colors flex items-center justify-center gap-1">
+            <button onClick={resetAll} className="hover:text-red-500 transition-colors flex items-center justify-center gap-1">
               <i className="fa-solid fa-rotate-left"></i> Réinitialiser les données
             </button>
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="hover:text-white transition-colors flex items-center justify-center gap-1">
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className="hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center gap-1">
               <i className={isDarkMode ? "fa-solid fa-sun" : "fa-solid fa-moon"}></i> Thème {isDarkMode ? 'clair' : 'sombre'}
             </button>
           </div>

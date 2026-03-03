@@ -13,17 +13,17 @@ const Welcome: React.FC<Props> = ({ state, onStart }) => {
     <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-12 animate-in fade-in duration-700">
       <div className="flex-1 space-y-8 text-center lg:text-left">
         <h2 className="text-indigo-500 font-bold uppercase tracking-[0.2em] text-sm">Gestion de Projet</h2>
-        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight text-white">
+        <h1 className="text-5xl sm:text-6xl font-extrabold leading-tight text-slate-900 dark:text-white">
           Maîtrisez vos dépenses dès le départ
         </h1>
-        <p className="text-lg text-slate-400 max-w-xl leading-relaxed">
+        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
           Anticipez tous les coûts nécessaires pour démarrer votre projet en toute sérénité. Une planification rigoureuse est la clé du succès.
         </p>
         
-        <div className="bg-[#242b3d] border-l-4 border-indigo-500 p-4 rounded-r-xl max-w-md">
-           <div className="flex items-center gap-3 text-slate-300 text-sm">
+        <div className="bg-white dark:bg-[#242b3d] border-l-4 border-indigo-500 p-4 rounded-r-xl max-w-md shadow-sm dark:shadow-none border dark:border-0 border-slate-200">
+           <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300 text-sm">
               <i className="fa-solid fa-circle-info text-indigo-400"></i>
-              <p>Contexte monétaire : <span className="text-white font-bold">{currency.name} ({currency.code})</span></p>
+              <p>Contexte monétaire : <span className="text-slate-900 dark:text-white font-bold">{currency.name} ({currency.code})</span></p>
            </div>
         </div>
 

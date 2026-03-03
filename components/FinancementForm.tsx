@@ -44,15 +44,15 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
         <span className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg">
           <i className="fa-solid fa-hand-holding-dollar"></i>
         </span>
-        <h2 className="text-2xl font-bold text-white">2) Le financement de vos besoins de démarrage</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">2) Le financement de vos besoins de démarrage</h2>
       </div>
-      <p className="text-slate-400 text-sm">Précisez l'origine de vos fonds exprimés en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
+      <p className="text-slate-500 dark:text-slate-400 text-sm">Précisez l'origine de vos fonds exprimés en <span className="text-indigo-600 dark:text-indigo-400 font-bold">{currency.code}</span>.</p>
 
-      <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#1a1f2b] border-b border-slate-800">
+              <tr className="bg-slate-50 dark:bg-[#1a1f2b] border-b border-slate-200 dark:border-slate-800">
                 <th className="p-4 text-left text-[10px] uppercase font-bold text-slate-500 tracking-wider">Sources de financement</th>
                 <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Montant ({currency.symbol})</th>
                 <th className="p-4 text-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Taux (%)</th>
@@ -70,15 +70,15 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                 </tr>
               )}
               {state.financements.map((f) => (
-                <tr key={f.id} className="hover:bg-[#1a1f2b]/50 transition-all">
+                <tr key={f.id} className="hover:bg-slate-50 dark:hover:bg-[#1a1f2b]/50 transition-all">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <i className={f.taux !== undefined ? 'fa-solid fa-building-columns text-indigo-400' : 'fa-solid fa-user text-indigo-400/70'}></i>
+                      <i className={f.taux !== undefined ? 'fa-solid fa-building-columns text-indigo-500 dark:text-indigo-400' : 'fa-solid fa-user text-indigo-500/70 dark:text-indigo-400/70'}></i>
                       <input 
                         type="text" 
                         value={f.label} 
                         onChange={(e) => updateSource(f.id, 'label', e.target.value)}
-                        className="bg-transparent border-none text-white font-bold p-0 focus:ring-0 w-full text-sm outline-none"
+                        className="bg-transparent border-none text-slate-900 dark:text-white font-bold p-0 focus:ring-0 w-full text-sm outline-none"
                       />
                     </div>
                   </td>
@@ -88,7 +88,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                       step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                       value={f.montant || ''} 
                       onChange={(e) => updateSource(f.id, 'montant', e.target.value)}
-                      className="w-full text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white font-mono text-sm focus:border-indigo-500 outline-none transition-all"
+                      className="w-full text-center px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-mono text-sm focus:border-indigo-500 outline-none transition-all"
                     />
                   </td>
                   <td className="p-4 text-center">
@@ -97,9 +97,9 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                         type="number" 
                         value={f.taux} 
                         onChange={(e) => updateSource(f.id, 'taux', e.target.value)}
-                        className="w-20 text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none transition-all"
+                        className="w-20 text-center px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none transition-all"
                       />
-                    ) : <span className="text-slate-600 font-mono text-xs">N/A</span>}
+                    ) : <span className="text-slate-400 dark:text-slate-600 font-mono text-xs">N/A</span>}
                   </td>
                   <td className="p-4 text-center">
                      {f.duree !== undefined ? (
@@ -107,9 +107,9 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                         type="number" 
                         value={f.duree} 
                         onChange={(e) => updateSource(f.id, 'duree', e.target.value)}
-                        className="w-20 text-center px-4 py-2 rounded-lg bg-[#1a1f2b] border border-slate-700 text-white text-sm focus:border-indigo-500 outline-none transition-all"
+                        className="w-20 text-center px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none transition-all"
                       />
-                    ) : <span className="text-slate-600 font-mono text-xs">N/A</span>}
+                    ) : <span className="text-slate-400 dark:text-slate-600 font-mono text-xs">N/A</span>}
                   </td>
                   <td className="p-4">
                      <button onClick={() => removeSource(f.id)} className="text-slate-500 hover:text-red-500 transition-colors">
@@ -122,20 +122,20 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
           </table>
         </div>
 
-        <div className="p-8 bg-[#1a1f2b] border-t border-slate-800">
+        <div className="p-8 bg-slate-50 dark:bg-[#1a1f2b] border-t border-slate-200 dark:border-slate-800">
            <div className="flex flex-col md:flex-row justify-between gap-8">
               <div className="space-y-4 flex-1">
                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-400">Total besoins :</span>
-                    <span className="font-mono font-bold text-indigo-400">{formatCurrency(totalBesoins, currency)} {currency.symbol}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Total besoins :</span>
+                    <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(totalBesoins, currency)} {currency.symbol}</span>
                  </div>
                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-400">Total financement :</span>
-                    <span className="font-mono font-bold text-indigo-400">{formatCurrency(totalFinancement, currency)} {currency.symbol}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Total financement :</span>
+                    <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(totalFinancement, currency)} {currency.symbol}</span>
                  </div>
-                 <div className="flex justify-between items-center pt-4 border-t border-slate-800 font-bold">
-                    <span className="text-white uppercase tracking-widest text-xs">Équilibre :</span>
-                    <span className={equilibre >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                 <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-800 font-bold">
+                    <span className="text-slate-900 dark:text-white uppercase tracking-widest text-xs">Équilibre :</span>
+                    <span className={equilibre >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}>
                        {equilibre === 0 ? 'Parfaitement équilibré' : `${formatCurrency(equilibre, currency)} ${currency.symbol}`}
                     </span>
                  </div>
@@ -150,19 +150,19 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button onClick={() => addSource('pret')} className="px-5 py-2.5 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400 flex items-center gap-2 group">
+        <button onClick={() => addSource('pret')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">
           <i className="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i> Ajouter un prêt
         </button>
-        <button onClick={() => addSource('subvention')} className="px-5 py-2.5 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400 flex items-center gap-2 group">
+        <button onClick={() => addSource('subvention')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">
           <i className="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i> Ajouter une subvention
         </button>
-        <button onClick={() => addSource('apport')} className="px-5 py-2.5 border-2 border-slate-700 hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-400 flex items-center gap-2 group">
+        <button onClick={() => addSource('apport')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">
           <i className="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i> Ajouter autre financement
         </button>
       </div>
 
-      <div className="pt-12 flex justify-between border-t border-slate-800">
-        <button onClick={onPrev} className="px-8 py-3 border border-slate-700 text-slate-400 font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2">
+      <div className="pt-12 flex justify-between border-t border-slate-200 dark:border-slate-800">
+        <button onClick={onPrev} className="px-8 py-3 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
           <i className="fa-solid fa-chevron-left text-xs"></i> <span>Précédent</span>
         </button>
         <button onClick={onNext} className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xl transition-all active:scale-95 flex items-center gap-2">

@@ -7,9 +7,10 @@ interface Props {
   state: AppState;
   onPrev: () => void;
   onReset: () => void;
+  isDarkMode: boolean;
 }
 
-const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
+const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
   const years = [0, 1, 2, 3, 4];
   const months = Array.from({ length: 12 }, (_, i) => i);
   const currency = state.currency;
@@ -64,10 +65,10 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
       const dotAmort = Object.values(amortDetails).reduce((a, b) => a + b, 0);
 
       // Calcul des intérêts (dégressifs simplifiés sur 5 ans)
-      const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined).reduce((a, f) => a + f.montant, 0);
+      const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined).reduce((a, f) => a + (f.montant || 0), 0);
       const avgInterestRate = (state.financements || [])
         .filter(f => f.taux && f.taux > 0)
-        .reduce((acc, f) => acc + (f.montant * (f.taux || 0) / 100), 0) / (totalEmprunts || 1);
+        .reduce((acc, f) => acc + ((f.montant || 0) * (f.taux || 0) / 100), 0) / (totalEmprunts || 1);
       
       // Capital restant dû estimé
       const capitalRestantDu = Math.max(0, totalEmprunts * (1 - (idx * 0.2)));
@@ -195,33 +196,33 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 no-print">
         <div>
           <div className="flex items-center gap-3 mb-1">
-             <i className="fa-solid fa-file-invoice text-indigo-500 text-2xl"></i>
-             <h2 className="text-3xl font-bold">Rapport Expert Prévisionnel (5 ans)</h2>
+             <i className="fa-solid fa-file-invoice text-indigo-600 dark:text-indigo-500 text-2xl"></i>
+             <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Rapport Expert Prévisionnel (5 ans)</h2>
           </div>
-          <p className="text-slate-500">Planification configurée en <span className="text-indigo-400 font-bold">{currency.name} ({currency.code})</span></p>
+          <p className="text-slate-500 dark:text-slate-400">Planification configurée en <span className="text-indigo-600 dark:text-indigo-400 font-bold">{currency.name} ({currency.code})</span></p>
         </div>
         <div className="flex gap-4">
           <button onClick={() => window.print()} className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center gap-3">
             <i className="fa-solid fa-print"></i> <span>Imprimer le Dossier</span>
           </button>
-          <button onClick={onPrev} className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-slate-300 hover:text-white transition-all flex items-center gap-2">
+          <button onClick={onPrev} className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-2 shadow-sm dark:shadow-none">
             <i className="fa-solid fa-pen-to-square text-xs"></i> <span>Ajuster les données</span>
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 no-print">
-        <div className="bg-[#242b3d] border border-slate-800 p-8 rounded-3xl h-80 shadow-xl">
-           <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-widest text-slate-500">
-              <i className="fa-solid fa-chart-column text-indigo-400"></i> Performance Annuelle ({currency.code})
+        <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 p-8 rounded-3xl h-80 shadow-xl">
+           <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              <i className="fa-solid fa-chart-column text-indigo-600 dark:text-indigo-400"></i> Performance Annuelle ({currency.code})
            </div>
            <ResponsiveContainer width="100%" height="85%">
               <BarChart data={financialData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="year" stroke="#94a3b8" fontSize={10} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickFormatter={(v) => formatCurrency(v, currency)} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#334155" : "#e2e8f0"} vertical={false} />
+                <XAxis dataKey="year" stroke={isDarkMode ? "#94a3b8" : "#64748b"} fontSize={10} />
+                <YAxis stroke={isDarkMode ? "#94a3b8" : "#64748b"} fontSize={10} tickFormatter={(v) => formatCurrency(v, currency)} />
                 <Tooltip 
-                  contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '10px'}} 
+                  contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', border: 'none', borderRadius: '10px', color: isDarkMode ? '#fff' : '#1e293b', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} 
                   itemStyle={{fontSize: '12px'}} 
                   formatter={(v: any) => [formatCurrency(v, currency) + ' ' + currency.symbol, '']} 
                 />
@@ -230,17 +231,17 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
               </BarChart>
            </ResponsiveContainer>
         </div>
-        <div className="bg-[#242b3d] border border-slate-800 p-8 rounded-3xl h-80 shadow-xl">
-           <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-widest text-slate-500">
-              <i className="fa-solid fa-chart-line text-indigo-400"></i> Flux de Trésorerie (CAF)
+        <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 p-8 rounded-3xl h-80 shadow-xl">
+           <div className="flex items-center gap-2 mb-4 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              <i className="fa-solid fa-chart-line text-indigo-600 dark:text-indigo-400"></i> Flux de Trésorerie (CAF)
            </div>
            <ResponsiveContainer width="100%" height="85%">
               <LineChart data={financialData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="year" stroke="#94a3b8" fontSize={10} />
-                <YAxis stroke="#94a3b8" fontSize={10} tickFormatter={(v) => formatCurrency(v, currency)} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#334155" : "#e2e8f0"} vertical={false} />
+                <XAxis dataKey="year" stroke={isDarkMode ? "#94a3b8" : "#64748b"} fontSize={10} />
+                <YAxis stroke={isDarkMode ? "#94a3b8" : "#64748b"} fontSize={10} tickFormatter={(v) => formatCurrency(v, currency)} />
                 <Tooltip 
-                  contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '10px'}} 
+                  contentStyle={{backgroundColor: isDarkMode ? '#1e293b' : '#fff', border: 'none', borderRadius: '10px', color: isDarkMode ? '#fff' : '#1e293b', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} 
                   itemStyle={{fontSize: '12px'}} 
                   formatter={(v: any) => [formatCurrency(v, currency) + ' ' + currency.symbol, '']} 
                 />
@@ -250,7 +251,119 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
         </div>
       </div>
 
+      {/* --- VUE WEB : RÉSUMÉ DES TABLEAUX --- */}
+      <div className="no-print space-y-12">
+        {/* Plan de Financement Web */}
+        <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <i className="fa-solid fa-vault text-indigo-600 dark:text-indigo-400"></i>
+            <h3 className="font-bold text-slate-900 dark:text-white">Plan de Financement Initial</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left font-bold">Emplois (Besoins)</th>
+                  <th className="px-6 py-4 text-right font-bold">Montant ({currency.symbol})</th>
+                  <th className="px-6 py-4 text-left font-bold">Ressources (Financements)</th>
+                  <th className="px-6 py-4 text-right font-bold">Montant ({currency.symbol})</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Investissements HT</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(totalInvestissement)}</td>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Apports Personnels</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.taux === undefined || f.taux === null).reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Trésorerie de départ</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(state.besoins?.['tresorerie-depart']?.montant || 0)}</td>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Emprunts Bancaires</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.taux !== undefined && f.taux !== null).reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                </tr>
+                <tr className="bg-indigo-50/30 dark:bg-indigo-500/5 font-bold">
+                  <td className="px-6 py-4 text-indigo-600 dark:text-indigo-400 uppercase text-xs">Total Emplois</td>
+                  <td className="px-6 py-4 text-right font-mono text-indigo-600 dark:text-indigo-400">{formatVal(totalInvestissement)}</td>
+                  <td className="px-6 py-4 text-indigo-600 dark:text-indigo-400 uppercase text-xs">Total Ressources</td>
+                  <td className="px-6 py-4 text-right font-mono text-indigo-600 dark:text-indigo-400">{formatVal(totalFinancement)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Compte de Résultats Web */}
+        <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <i className="fa-solid fa-file-invoice-dollar text-indigo-600 dark:text-indigo-400"></i>
+            <h3 className="font-bold text-slate-900 dark:text-white">Compte de Résultats Prévisionnel</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left font-bold">Poste</th>
+                  {years.map(y => <th key={y} className="px-6 py-4 text-right font-bold">Année {y+1}</th>)}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr>
+                  <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Chiffre d'Affaires HT</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-900 dark:text-white">{formatVal(d.ca)}</td>)}
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400 italic pl-10">Charges d'exploitation</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-600 dark:text-slate-400">{formatVal(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges)}</td>)}
+                </tr>
+                <tr className="bg-slate-50/50 dark:bg-slate-800/20">
+                  <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Résultat d'Exploitation</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">{formatVal(d.resExploit)}</td>)}
+                </tr>
+                <tr className="bg-indigo-600 text-white">
+                  <td className="px-6 py-4 font-bold uppercase text-xs">Résultat Net</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono font-bold">{formatVal(d.netResult)}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Trésorerie Web */}
+        <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <i className="fa-solid fa-piggy-bank text-indigo-600 dark:text-indigo-400"></i>
+            <h3 className="font-bold text-slate-900 dark:text-white">Évolution de la Trésorerie</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left font-bold">Indicateur</th>
+                  {years.map(y => <th key={y} className="px-6 py-4 text-right font-bold">Année {y+1}</th>)}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tr>
+                  <td className="px-6 py-4 text-slate-700 dark:text-slate-300">CAF de l'exercice</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-900 dark:text-white">{formatVal(d.caf)}</td>)}
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400 italic pl-10">Remboursement Emprunts</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-600 dark:text-slate-400">{formatVal(d.remboursementEmprunt)}</td>)}
+                </tr>
+                <tr className="bg-emerald-500/10 dark:bg-emerald-500/5">
+                  <td className="px-6 py-4 font-bold text-emerald-700 dark:text-emerald-400">Solde de Trésorerie Cumulé</td>
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       {/* --- STRUCTURE DU PDF (PRINT ONLY) --- */}
+
       <div className="print-only hidden text-black bg-white w-full">
         
         {/* PAGE 1 : PAGE DE GARDE */}
@@ -492,24 +605,25 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
           <PrintSectionHeader title="Soldes intermédiaires de gestion" />
           <ProjectInfoBlock />
 
-          <div className="avoid-break mb-8">
-            <table className="w-full border-collapse border-2 border-black text-[8px]">
-              <thead className="bg-slate-200">
+          <div className="avoid-break mb-8 overflow-x-auto">
+            <table className="w-full border-collapse border border-slate-300 dark:border-slate-700 text-[10px] print:text-[8px] print:border-black print:border-2">
+              <thead className="bg-slate-100 dark:bg-slate-800 print:bg-slate-200 print:text-black">
                 <tr>
-                  <th className="border-2 border-black p-1 text-left">Indicateur</th>
-                  {years.map(y => <React.Fragment key={y}><th className="border-2 border-black p-1">Année {y+1}</th><th className="border-2 border-black p-1">%</th></React.Fragment>)}
+                  <th className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-left">Indicateur</th>
+                  {years.map(y => <React.Fragment key={y}><th className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Année {y+1}</th><th className="border border-slate-300 dark:border-slate-700 print:border-black p-1">%</th></React.Fragment>)}
                 </tr>
               </thead>
-              <tbody>
-                <tr><td className="border-2 border-black p-1 font-bold">Chiffre d'affaires</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-black p-1 text-right font-mono">{formatVal(d.ca)}</td><td className="border-2 border-black p-1 text-center">100%</td></React.Fragment>)}</tr>
-                <tr><td className="border-2 border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td><td className="border-2 border-black p-1 text-center">{d.ca > 0 ? ((d.costOfGoods/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1">Marge globale</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td><td className="border-2 border-black p-1 text-center">{d.ca > 0 ? ((d.margin/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1 uppercase">Valeur ajoutée</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-black p-1 text-right font-mono">{formatVal(d.va)}</td><td className="border-2 border-black p-1 text-center">{d.ca > 0 ? ((d.va/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-300 font-black"><td className="border-2 border-black p-1 uppercase">E.B.E.</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-black p-1 text-right font-mono">{formatVal(d.ebe)}</td><td className="border-2 border-black p-1 text-center">{d.ca > 0 ? ((d.ebe/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Capacité autofinancement</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border-2 border-white p-1 text-right font-mono">{formatVal(d.caf)}</td><td className="border-2 border-white p-1 text-center">{d.ca > 0 ? ((d.caf/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+              <tbody className="print:text-black">
+                <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 font-bold">Chiffre d'affaires</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.ca)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">100%</td></React.Fragment>)}</tr>
+                <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.costOfGoods/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-50 dark:bg-slate-800/30 print:bg-slate-50 font-bold"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Marge globale</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.margin)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.margin/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-100 dark:bg-slate-800/50 print:bg-slate-100 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">Valeur ajoutée</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.va)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.va/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-200 dark:bg-slate-800/70 print:bg-slate-200 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">E.B.E.</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.ebe)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.ebe/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 print:bg-black print:text-white font-black"><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 uppercase">Capacité autofinancement</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-right font-mono">{formatVal(d.caf)}</td><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-center">{d.ca > 0 ? ((d.caf/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
               </tbody>
             </table>
           </div>
+
 
           <div className="avoid-break">
             <PrintSectionHeader title="Capacité d'autofinancement" />
@@ -605,13 +719,13 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
               <tr><td className="border-2 border-black p-1">Remboursement d'emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
               <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des emplois</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalInvestissement : 0) + d.bfrVariation + d.remboursementEmprunt)}</td>)}</tr>
               
-              <tr className="bg-slate-50 font-bold border-t-4 border-black"><td className="border-2 border-black p-1 uppercase" colSpan={6}>Ressources</td></tr>
-              <tr><td className="border-2 border-black p-1">Apports personnels</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => !f.tau).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Emprunts bancaires</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.taux).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Capacité d'autofinancement (CAF)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
-              <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des ressources</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalFinancement : 0) + d.caf)}</td>)}</tr>
+              <tr className="bg-slate-50 dark:bg-slate-800/50 font-bold border-t-4 border-slate-900 dark:border-slate-100 print:bg-slate-50 print:text-black print:border-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase" colSpan={6}>Ressources</td></tr>
+              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Apports personnels</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.taux === undefined || f.taux === null).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border border-slate-300 dark:border-slate-700 print:border-black"></td></tr>
+              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Emprunts bancaires</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.taux !== undefined && f.taux !== null).reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border border-slate-300 dark:border-slate-700 print:border-black"></td></tr>
+              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Capacité d'autofinancement (CAF)</td>{financialData.map(d => <td key={d.year} className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
+              <tr className="bg-slate-100 dark:bg-slate-800/50 font-bold print:bg-slate-100 print:text-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">Total des ressources</td>{financialData.map((d, i) => <td key={d.year} className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalFinancement : 0) + d.caf)}</td>)}</tr>
               
-              <tr className="bg-black text-white font-black border-t-2 border-white"><td className="border-2 border-white p-1 uppercase">Solde de trésorerie annuel</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}</tr>
+              <tr className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-black border-t-2 border-white print:bg-black print:text-white print:border-black"><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 uppercase">Solde de trésorerie annuel</td>{financialData.map(d => <td key={d.year} className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-right font-mono">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}</tr>
             </tbody>
           </table>
           <p className="text-right w-full text-xs font-bold mt-4 italic">7</p>
@@ -679,11 +793,11 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset }) => {
         </div>
       </div>
 
-      <div className="no-print pt-10 border-t border-slate-800 flex justify-between">
-        <button onClick={onPrev} className="px-8 py-3 border border-slate-700 text-slate-400 font-bold rounded-xl hover:bg-slate-800 transition-all flex items-center gap-2">
+      <div className="no-print pt-10 border-t border-slate-200 dark:border-slate-800 flex justify-between">
+        <button onClick={onPrev} className="px-8 py-3 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center gap-2">
           <i className="fa-solid fa-arrow-left text-xs"></i> <span>Ajuster les saisies</span>
         </button>
-        <button onClick={onReset} className="px-6 py-3 bg-red-500/10 border border-red-500/50 text-red-500 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all flex items-center gap-2">
+        <button onClick={onReset} className="px-6 py-3 bg-red-500/10 border border-red-500/50 text-red-600 dark:text-red-500 font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all flex items-center gap-2">
           <i className="fa-solid fa-trash-can text-xs"></i> <span>Effacer les données</span>
         </button>
       </div>

@@ -30,16 +30,16 @@ const BesoinsForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
         <span className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-lg">
           <i className="fa-solid fa-list-check"></i>
         </span>
-        <h2 className="text-2xl font-bold text-white">1) Vos besoins de démarrage</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">1) Vos besoins de démarrage</h2>
       </div>
-      <p className="text-slate-400 text-sm">Listez toutes les dépenses nécessaires exprimées en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
+      <p className="text-slate-500 dark:text-slate-400 text-sm">Listez toutes les dépenses nécessaires exprimées en <span className="text-indigo-400 font-bold">{currency.code}</span>.</p>
 
-      <div className="bg-[#242b3d] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl dark:shadow-2xl">
          <div className="bg-orange-500/10 border-l-4 border-orange-500 p-4 m-8 flex items-start gap-3 rounded-r-xl">
-            <i className="fa-solid fa-triangle-exclamation text-orange-500 mt-1"></i>
+            <i className="fa-solid fa-triangle-exclamation text-orange-600 dark:text-orange-500 mt-1"></i>
             <div>
-               <p className="text-sm font-bold text-orange-200">Rappel monétaire :</p>
-               <p className="text-xs text-orange-200/80">Tous les montants saisis sont considérés comme étant en {currency.name} ({currency.symbol}).</p>
+               <p className="text-sm font-bold text-orange-800 dark:text-orange-200">Rappel monétaire :</p>
+               <p className="text-xs text-orange-800/80 dark:text-orange-200/80">Tous les montants saisis sont considérés comme étant en {currency.name} ({currency.symbol}).</p>
             </div>
          </div>
 
@@ -49,35 +49,35 @@ const BesoinsForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
               key={item.id} 
               className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${
                 (data[item.id]?.montant || 0) > 0 
-                ? 'bg-[#1a1f2b] border-indigo-500/50 shadow-inner' 
-                : 'bg-[#1a1f2b]/50 border-slate-800 hover:border-slate-700'
+                ? 'bg-slate-50 dark:bg-[#1a1f2b] border-indigo-500/50 shadow-inner' 
+                : 'bg-white dark:bg-[#1a1f2b]/50 border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-slate-700'
               }`}
             >
               <div className="flex items-center gap-4 flex-1">
-                <i className={`fa-solid fa-file-invoice-dollar text-lg ${ (data[item.id]?.montant || 0) > 0 ? 'text-indigo-400' : 'text-slate-600' }`}></i>
-                <label className="text-sm font-bold text-slate-300">{item.label}</label>
+                <i className={`fa-solid fa-file-invoice-dollar text-lg ${ (data[item.id]?.montant || 0) > 0 ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-600' }`}></i>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">{item.label}</label>
               </div>
               
               <div className="flex items-center gap-3">
                 <div className="w-40 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] font-mono font-bold">{currency.symbol}</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-[10px] font-mono font-bold">{currency.symbol}</span>
                   <input 
                     type="number"
                     step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                     placeholder="0"
                     value={data[item.id]?.montant || ''}
                     onChange={(e) => handleItemChange(item.id, 'montant', e.target.value)}
-                    className="w-full pl-12 pr-4 py-2 rounded-lg bg-[#242b3d] border border-slate-700 text-white font-mono text-right text-sm focus:border-indigo-500 outline-none transition-all"
+                    className="w-full pl-12 pr-4 py-2 rounded-lg bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-mono text-right text-sm focus:border-indigo-500 outline-none transition-all"
                   />
                 </div>
                 {item.defaultAmort > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-500">Amort.</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Amort.</span>
                     <input 
                       type="number"
                       value={data[item.id]?.amortissement ?? item.defaultAmort}
                       onChange={(e) => handleItemChange(item.id, 'amortissement', e.target.value)}
-                      className="w-12 text-center py-2 rounded-lg bg-[#242b3d] border border-slate-700 text-white text-xs outline-none"
+                      className="w-12 text-center py-2 rounded-lg bg-white dark:bg-[#242b3d] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs outline-none"
                     />
                   </div>
                 )}
@@ -88,18 +88,18 @@ const BesoinsForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
       </div>
 
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-5xl px-4 no-print pointer-events-none">
-        <div className="bg-[#1a1f2b] border border-indigo-500/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between text-white pointer-events-auto backdrop-blur-md bg-opacity-95">
+        <div className="bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-indigo-500/30 p-4 rounded-2xl shadow-2xl flex items-center justify-between text-slate-900 dark:text-white pointer-events-auto backdrop-blur-md bg-opacity-95 dark:bg-opacity-95">
           <div className="flex items-center gap-6">
              <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Total Besoins</p>
-                <p className="text-2xl font-mono font-bold text-indigo-400">{formatCurrency(total, currency)} <span className="text-xs">{currency.symbol}</span></p>
+                <p className="text-2xl font-mono font-bold text-indigo-600 dark:text-indigo-400">{formatCurrency(total, currency)} <span className="text-xs">{currency.symbol}</span></p>
              </div>
           </div>
           <div className="flex gap-3">
-            <button onClick={onPrev} className="px-6 py-2 border border-slate-700 hover:bg-slate-800 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
+            <button onClick={onPrev} className="px-6 py-2 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-sm font-bold transition-all flex items-center gap-2 text-slate-600 dark:text-slate-300">
               <i className="fa-solid fa-arrow-left text-xs"></i> <span>Précédent</span>
             </button>
-            <button onClick={onNext} className="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-sm font-bold transition-all shadow-lg flex items-center gap-2">
+            <button onClick={onNext} className="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg flex items-center gap-2">
               <span>Suivant</span> <i className="fa-solid fa-arrow-right text-xs"></i>
             </button>
           </div>
