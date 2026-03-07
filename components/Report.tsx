@@ -65,7 +65,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
       const dotAmort = Object.values(amortDetails).reduce((a, b) => a + b, 0);
 
       // Calcul des intérêts (dégressifs simplifiés sur 5 ans)
-      const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined).reduce((a, f) => a + (f.montant || 0), 0);
+      const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined && f.taux !== null).reduce((a, f) => a + (f.montant || 0), 0);
       const avgInterestRate = (state.financements || [])
         .filter(f => f.taux && f.taux > 0)
         .reduce((acc, f) => acc + ((f.montant || 0) * (f.taux || 0) / 100), 0) / (totalEmprunts || 1);
@@ -78,20 +78,37 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
 
       const va = margin - fixedCosts;
       
-      const tauxChargesDir = (state.revenue?.accre && idx === 0) ? 0.05 : 0.15;
+      // Calcul des charges sociales selon le statut (Standard Français)
+      const isAssimileSalarie = ['sa', 'sasu'].includes(state.generalInfo?.statutJuridique?.toLowerCase() || '');
+      let tauxChargesDir = isAssimileSalarie ? 0.45 : 0.35; // Taux sur le brut
+      
+      if (state.revenue?.accre && idx === 0) {
+        tauxChargesDir = isAssimileSalarie ? 0.20 : 0.15; // Réduction ACCRE année 1
+      }
+      
       const chargesSocDir = (state.revenue?.remunDir?.[idx] || 0) * tauxChargesDir;
-      const chargesSocEmp = (state.revenue?.salairesEmp?.[idx] || 0) * 0.30;
+      const chargesSocEmp = (state.revenue?.salairesEmp?.[idx] || 0) * 0.42; // Taux standard employeur
       const totalSalairesEtCharges = (state.revenue?.salairesEmp?.[idx] || 0) + (state.revenue?.remunDir?.[idx] || 0) + chargesSocDir + chargesSocEmp;
       
       const ebe = va - totalSalairesEtCharges;
       const resExploit = ebe - dotAmort;
       const resAvantImpots = resExploit - chargesFin;
-      const is = resAvantImpots > 0 ? resAvantImpots * 0.25 : 0;
+      
+      // Barème Impôt sur les Sociétés (IS) - Formule PDF AI45
+      let is = 0;
+      if (resAvantImpots > 0) {
+        if (resAvantImpots <= 38120) {
+          is = resAvantImpots * 0.15;
+        } else {
+          is = (38120 * 0.15) + ((resAvantImpots - 38120) * 0.25);
+        }
+      }
+
       const netResult = resAvantImpots - is;
       const caf = netResult + dotAmort;
 
-      const creditClient = ca * ((state.revenue?.joursClients || 0) / 360);
-      const detteFournisseur = costOfGoods * ((state.revenue?.joursFournisseurs || 0) / 360);
+      const creditClient = ca * ((state.revenue?.joursClients || 0) / 365);
+      const detteFournisseur = costOfGoods * ((state.revenue?.joursFournisseurs || 0) / 365);
       const bfr = creditClient - detteFournisseur;
       const bfrVariation = bfr - prevBfr;
       prevBfr = bfr;
