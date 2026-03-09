@@ -64,30 +64,43 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
 
       const dotAmort = Object.values(amortDetails).reduce((a, b) => a + b, 0);
 
-      // Calcul des intérêts (dégressifs simplifiés sur 5 ans)
+      // --- CALCUL DES INTERETS (Aligné sur PDF : Total Intérêts / Durée) ---
       const totalEmprunts = (state.financements || []).filter(f => f.taux !== undefined && f.taux !== null).reduce((a, f) => a + (f.montant || 0), 0);
-      const avgInterestRate = (state.financements || [])
-        .filter(f => f.taux && f.taux > 0)
-        .reduce((acc, f) => acc + ((f.montant || 0) * (f.taux || 0) / 100), 0) / (totalEmprunts || 1);
       
-      // Capital restant dû estimé
-      const capitalRestantDu = Math.max(0, totalEmprunts * (1 - (idx * 0.2)));
-      const chargesFin = capitalRestantDu * avgInterestRate;
+      // Calcul du coût total du crédit (Formule simplifiée mensualité constante)
+      const calculateTotalInterest = () => {
+        let totalInt = 0;
+        (state.financements || []).forEach(f => {
+          if (f.taux && f.taux > 0 && f.duree && f.duree > 0) {
+            const r = (f.taux / 100) / 12;
+            const n = f.duree;
+            const mens = (f.montant * r) / (1 - Math.pow(1 + r, -n));
+            totalInt += (mens * n) - f.montant;
+          }
+        });
+        return totalInt;
+      };
+
+      const totalInterestOverLife = calculateTotalInterest();
+      const chargesFin = totalInterestOverLife / 5; // Répartition linéaire sur 5 ans (Standard PDF)
       
       const remboursementEmprunt = idx < 5 ? totalEmprunts / 5 : 0;
 
       const va = margin - fixedCosts;
       
-      // Calcul des charges sociales selon le statut (Standard Français)
-      const isAssimileSalarie = ['sa', 'sasu'].includes(state.generalInfo?.statutJuridique?.toLowerCase() || '');
-      let tauxChargesDir = isAssimileSalarie ? 0.45 : 0.35; // Taux sur le brut
+      // --- CHARGES SOCIALES (Calculées sur le NET saisi par l'utilisateur - Alignement PDF) ---
+      const isAssimileSalarie = ['sas', 'sasu'].includes(state.generalInfo?.statutJuridique?.toLowerCase() || '');
       
+      // Taux sur le NET (PDF Ref: SARL 45%, SAS 70%, Emp 72%)
+      let tauxChargesDirNet = isAssimileSalarie ? 0.70 : 0.45; 
+      const tauxChargesEmpNet = 0.72;
+
       if (state.revenue?.accre && idx === 0) {
-        tauxChargesDir = isAssimileSalarie ? 0.20 : 0.15; // Réduction ACCRE année 1
+        tauxChargesDirNet = isAssimileSalarie ? 0.35 : 0.25; // Réduction ACCRE
       }
       
-      const chargesSocDir = (state.revenue?.remunDir?.[idx] || 0) * tauxChargesDir;
-      const chargesSocEmp = (state.revenue?.salairesEmp?.[idx] || 0) * 0.42; // Taux standard employeur
+      const chargesSocDir = (state.revenue?.remunDir?.[idx] || 0) * tauxChargesDirNet;
+      const chargesSocEmp = (state.revenue?.salairesEmp?.[idx] || 0) * tauxChargesEmpNet;
       const totalSalairesEtCharges = (state.revenue?.salairesEmp?.[idx] || 0) + (state.revenue?.remunDir?.[idx] || 0) + chargesSocDir + chargesSocEmp;
       
       const ebe = va - totalSalairesEtCharges;
