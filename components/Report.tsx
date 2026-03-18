@@ -28,16 +28,29 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
     const principals = [0, 0, 0, 0, 0];
 
     (state.financements || []).forEach(f => {
-      if (!f.taux || !f.duree || !f.montant) return;
+      if (!f.montant || f.type !== 'emprunt') return;
 
-      const r = (f.taux / 100) / 12;
-      const n = f.duree;
-      const mensualite = (f.montant * r) / (1 - Math.pow(1 + r, -n));
+      const taux = f.taux || 0;
+      const duree = f.duree || 0;
+      if (duree <= 0) return;
+
+      const r = taux > 0 ? (taux / 100) / 12 : 0;
+      const n = duree;
+
+      let mensualite = 0;
+
+      if (r > 0) {
+        mensualite = (f.montant * r) / (1 - Math.pow(1 + r, -n));
+      } else {
+        mensualite = f.montant / n; // prêt à 0%
+      }
 
       let capitalRestant = f.montant;
+
       for (let m = 0; m < n; m++) {
-        const interet = capitalRestant * r;
+        const interet = r > 0 ? capitalRestant * r : 0;
         const principal = mensualite - interet;
+
         capitalRestant -= principal;
 
         const yearIndex = Math.floor(m / 12);
@@ -54,6 +67,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
 
   // --- CALCULS FINANCIERS ANNUELS ---
   const financialData = useMemo(() => {
+    const safe = (v: any) => (isNaN(v) || v === Infinity ? 0 : v);
     const caArr: number[] = [];
     const inflation = state.revenue?.tauxInflation || 0;
     const isServices = state.generalInfo?.activiteType === 'services';
@@ -84,15 +98,18 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
     let prevBfr = 0;
 
     years.forEach((y, idx) => {
-      const ca = caArr[idx] || 0;
+      const ca = safe(caArr[idx]);
 
       /* ------------------ */
       /* COUT MARCHANDISES */
       /* Excel: =SI(service;0;CA * taux) */
       /* ------------------ */
-      const costOfGoods = isServices
-        ? 0
-        : ca * ((state.revenue?.tauxCoutMarchandises || 0) / 100);
+      const tauxCOGS = Math.min(
+        Math.max(state.revenue?.tauxCoutMarchandises || 0, 0),
+        100
+      );
+
+      const costOfGoods = isServices ? 0 : ca * (tauxCOGS / 100);
 
       const margin = ca - costOfGoods;
 
@@ -105,12 +122,21 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         return acc;
       }, {} as Record<string, number>);
 
+      let remunDir = state.revenue?.remunDir?.[idx] || 0;
+      let salairesEmp = state.revenue?.salairesEmp?.[idx] || 0;
+
       let fixedCosts = Object.values(chargesDetail)
         .reduce((a, b) => a + (b || 0), 0);
 
-      /* Excel inflation */
+      let salairesTotal = remunDir + salairesEmp;
+
+      // inflation globale
       if (idx > 0 && inflation > 0) {
-        fixedCosts *= Math.pow(1 + inflation / 100, idx);
+        const factor = Math.pow(1 + inflation / 100, idx);
+        fixedCosts *= factor;
+        salairesTotal *= factor;
+        remunDir *= factor;
+        salairesEmp *= factor;
       }
 
       /* ------------------ */
@@ -157,14 +183,11 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         tauxChargesDirNet = isAssimileSalarie ? 0.35 : 0.25;
       }
 
-      const remunDir = state.revenue?.remunDir?.[idx] || 0;
-      const salairesEmp = state.revenue?.salairesEmp?.[idx] || 0;
-
       const chargesSocDir = remunDir * tauxChargesDirNet;
       const chargesSocEmp = salairesEmp * tauxChargesEmpNet;
 
       const totalSalairesEtCharges =
-        remunDir + salairesEmp + chargesSocDir + chargesSocEmp;
+        salairesTotal + chargesSocDir + chargesSocEmp;
 
       /* ------------------ */
       /* EBE */
@@ -209,10 +232,12 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
 
       // Taux de marge
       const tauxMarge = ca !== 0 ? margin / ca : 0;
+      const margeSurCoutVariable = margin;
+      const ratioRentabilite = tauxMarge * 100;
 
       // Seuil de rentabilité
       const seuilRentabilite =
-        tauxMarge > 0 ? fixedCosts / tauxMarge : -1;
+        tauxMarge > 0 ? fixedCosts / tauxMarge : null;
 
       /* ------------------ */
       /* TRESORERIE */
@@ -232,7 +257,9 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         ca,
         costOfGoods,
         margin,
+        margeSurCoutVariable,
         tauxMarge,
+        ratioRentabilite,
         seuilRentabilite,
         va,
         fixedCosts,
@@ -456,11 +483,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                   <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 sticky left-0 bg-white dark:bg-gray-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Seuil de rentabilité</td>
                   {financialData.map(d => (
                     <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-900 dark:text-white">
-                      {d.seuilRentabilite === -1 ? (
-                        <span className="text-red-500 text-xs italic">Marge négative</span>
-                      ) : (
-                        formatVal(d.seuilRentabilite)
-                      )}
+                      {formatVal(d.seuilRentabilite ?? 0)}
                     </td>
                   ))}
                 </tr>
@@ -805,7 +828,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                 <tr className="bg-slate-100 font-bold border-t-2 border-black"><td className="border-2 border-black p-1">Marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Taux de marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-center font-mono">{(d.tauxMarge * 100).toFixed(0)}%</td>)}</tr>
                 <tr><td className="border-2 border-black p-1 italic">Coûts fixes (incl. amort. & fin.)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fixedCosts + d.totalSalairesEtCharges + d.dotAmort + d.chargesFin)}</td>)}</tr>
-                <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Seuil de rentabilité (chiffre d'affaires)</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.seuilRentabilite)}</td>)}</tr>
+                <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Seuil de rentabilité (chiffre d'affaires)</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.seuilRentabilite ?? 0)}</td>)}</tr>
               </tbody>
             </table>
           </div>
