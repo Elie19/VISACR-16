@@ -20,6 +20,7 @@ const INITIAL_STATE: AppState = {
     email: '',
     ville: '',
     descriptionProjet: '',
+    tauxIS: 30, // Défaut zone FCFA
   },
   currency: SUPPORTED_CURRENCIES[0],
   besoins: {},
@@ -31,8 +32,10 @@ const INITIAL_STATE: AppState = {
     tauxCroissance: [10, 10, 10, 10],
     caManuel: Array(5).fill(0).map(() => Array(12).fill(0)),
     tauxCoutMarchandises: 50,
+    tauxInflation: 2, // Défaut 2%
     joursClients: 30,
     joursFournisseurs: 30,
+    joursStock: 30,
     salairesEmp: [0, 0, 0, 0, 0],
     remunDir: [0, 0, 0, 0, 0],
     accre: false,
@@ -52,9 +55,11 @@ const App: React.FC = () => {
       return {
         ...INITIAL_STATE,
         ...parsed,
-        generalInfo: { ...INITIAL_STATE.generalInfo, ...parsed.generalInfo },
-        currency: parsed.currency || INITIAL_STATE.currency,
-        revenue: { ...INITIAL_STATE.revenue, ...parsed.revenue },
+        generalInfo:  { ...INITIAL_STATE.generalInfo,  ...parsed.generalInfo },
+        revenue:      { ...INITIAL_STATE.revenue,      ...parsed.revenue },
+        besoins:      parsed.besoins      ?? INITIAL_STATE.besoins,
+        financements: parsed.financements ?? INITIAL_STATE.financements,
+        charges:      { ...INITIAL_STATE.charges,      ...parsed.charges },
       };
     } catch (e) {
       console.error("Erreur lors du parsing du localStorage", e);

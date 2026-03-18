@@ -41,9 +41,21 @@ const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
     onUpdate({ ...data, tauxCroissance: arr });
   };
 
+  const applyGrowthToMode2 = () => {
+    const growthRate = data.tauxCroissance[0] || 0;
+    const year1 = data.caManuel[0];
+    const newCaManuel = [year1];
+    for (let y = 1; y < 5; y++) {
+      newCaManuel.push(year1.map(val => val * Math.pow(1 + growthRate / 100, y)));
+    }
+    onUpdate({ ...data, caManuel: newCaManuel });
+  };
+
   const totalYear1 = data.caMode === 'mode1' 
     ? data.caMensuel.reduce((acc, v) => acc + v, 0)
     : (data.caManuel[0] || []).reduce((acc, v) => acc + v, 0);
+
+  const isServices = state.generalInfo.activiteType === 'services';
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -173,25 +185,35 @@ const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
               <i className="fa-solid fa-table-list text-indigo-500 dark:text-indigo-400"></i>
               <span>Saisie Manuelle sur 5 ans ({currency.symbol})</span>
             </h3>
-            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-              <table className="w-full text-[10px]">
+            <div className="mb-4">
+               <button 
+                 onClick={applyGrowthToMode2}
+                 className="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg border border-indigo-500/30 transition-all flex items-center gap-2"
+               >
+                 <i className="fa-solid fa-wand-magic-sparkles"></i>
+                 Appliquer le taux de croissance (Année 1 → 5)
+               </button>
+            </div>
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 shadow-inner">
+              <table className="w-full text-[10px] border-collapse">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-[#1a1f2b] text-slate-500 border-b border-slate-200 dark:border-slate-800">
-                    <th className="py-2 px-3 text-left sticky left-0 bg-slate-50 dark:bg-[#1a1f2b]">Année</th>
-                    {Array.from({length: 12}).map((_, i) => <th key={i} className="py-2 px-2 text-center">M{i+1}</th>)}
+                    <th className="py-2 px-3 text-left sticky left-0 bg-slate-50 dark:bg-[#1a1f2b] z-10 border-r border-slate-200 dark:border-slate-800">Année</th>
+                    {Array.from({length: 12}).map((_, i) => <th key={i} className="py-2 px-2 text-center min-w-[60px]">M{i+1}</th>)}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {data.caManuel.map((year, yIdx) => (
                     <tr key={yIdx}>
-                      <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300 sticky left-0 bg-white dark:bg-[#242b3d]">A{yIdx+1}</td>
+                      <td className="py-2 px-3 font-bold text-slate-700 dark:text-slate-300 sticky left-0 bg-white dark:bg-[#242b3d] z-10 border-r border-slate-200 dark:border-slate-800">A{yIdx+1}</td>
                       {year.map((val, mIdx) => (
                         <td key={mIdx} className="p-1">
                           <input 
                             type="number" 
+                            min="0"
                             value={val || ''} 
                             onChange={(e) => handleCaManuelChange(yIdx, mIdx, e.target.value)}
-                            className="w-14 bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded p-1 text-right text-slate-900 dark:text-white font-mono text-[9px] focus:border-indigo-500 outline-none"
+                            className="w-full bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded p-1 text-right text-slate-900 dark:text-white font-mono text-[9px] focus:border-indigo-500 outline-none"
                           />
                         </td>
                       ))}
@@ -219,13 +241,32 @@ const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="space-y-6">
+               {!isServices && (
+                 <div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Coût d'achat marchandises (% du CA)</label>
+                    <div className="relative">
+                       <input 
+                         type="number" 
+                         min="0"
+                         max="100"
+                         value={data.tauxCoutMarchandises} 
+                         onChange={(e) => onUpdate({...data, tauxCoutMarchandises: parseFloat(e.target.value) || 0})}
+                         className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:border-indigo-500 outline-none pr-10"
+                       />
+                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-600 dark:text-indigo-400 font-bold">%</span>
+                    </div>
+                 </div>
+               )}
+
                <div>
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Coût d'achat marchandises (% du CA)</label>
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Taux d'inflation annuel des charges (%)</label>
                   <div className="relative">
                      <input 
                        type="number" 
-                       value={data.tauxCoutMarchandises} 
-                       onChange={(e) => onUpdate({...data, tauxCoutMarchandises: parseFloat(e.target.value) || 0})}
+                       min="0"
+                       max="50"
+                       value={data.tauxInflation} 
+                       onChange={(e) => onUpdate({...data, tauxInflation: parseFloat(e.target.value) || 0})}
                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-sm focus:border-indigo-500 outline-none pr-10"
                      />
                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-600 dark:text-indigo-400 font-bold">%</span>
@@ -233,21 +274,33 @@ const RevenueForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) => {
                </div>
                
                <div className="pt-6 border-t border-slate-100 dark:border-slate-800/50">
-                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Délais de paiement (BFR)</h4>
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Délais de paiement & Stock (BFR)</h4>
                   <div className="grid grid-cols-2 gap-6">
                      <div>
                         <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Délai clients (jours)</label>
                         <input 
                           type="number" 
+                          min="0"
                           value={data.joursClients} 
                           onChange={(e) => onUpdate({...data, joursClients: parseInt(e.target.value) || 0})}
                           className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none"
                         />
                      </div>
                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Stock moyen (jours)</label>
+                        <input 
+                          type="number" 
+                          min="0"
+                          value={data.joursStock} 
+                          onChange={(e) => onUpdate({...data, joursStock: parseInt(e.target.value) || 0})}
+                          className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none"
+                        />
+                     </div>
+                     <div className="col-span-2">
                         <label className="block text-[10px] font-bold text-slate-500 mb-2 uppercase">Délai fournisseurs (jours)</label>
                         <input 
                           type="number" 
+                          min="0"
                           value={data.joursFournisseurs} 
                           onChange={(e) => onUpdate({...data, joursFournisseurs: parseInt(e.target.value) || 0})}
                           className="w-full px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none"

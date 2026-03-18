@@ -22,6 +22,7 @@ export interface GeneralInfo {
   email: string;
   ville: string;
   descriptionProjet: string;
+  tauxIS: number;
 }
 
 export interface BesoinItem {
@@ -38,6 +39,7 @@ export interface FinancingSource {
   id: string;
   label: string;
   montant: number;
+  type: 'apport' | 'emprunt' | 'subvention';
   taux?: number;
   duree?: number;
 }
@@ -59,8 +61,10 @@ export interface RevenueState {
   tauxCroissance: number[]; // Year 1->2, 2->3, etc.
   caManuel: number[][]; // [year][month]
   tauxCoutMarchandises: number;
+  tauxInflation: number;
   joursClients: number;
   joursFournisseurs: number;
+  joursStock: number;
   salairesEmp: number[]; // 5 years
   remunDir: number[]; // 5 years
   accre: boolean;

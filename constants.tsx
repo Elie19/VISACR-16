@@ -32,6 +32,9 @@ export const formatCurrency = (amount: number, currency: Currency): string => {
   }).format(amount);
 };
 
+export const formatPercent = (value: number, decimals = 1) =>
+  `${value.toFixed(decimals)} %`;
+
 export const LISTE_BESOINS_KEYS = [
   { id: 'frais-etablissement', label: "Frais d'établissement", defaultAmort: 5 },
   { id: 'frais-compteurs', label: "Frais d'ouverture de compteurs", defaultAmort: 5 },

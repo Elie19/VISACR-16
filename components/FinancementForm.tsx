@@ -16,20 +16,21 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
   const totalFinancement = state.financements.reduce((acc, f) => acc + f.montant, 0);
   const equilibre = totalFinancement - totalBesoins;
 
-  const addSource = (type: 'apport' | 'pret' | 'subvention') => {
+  const addSource = (type: 'apport' | 'emprunt' | 'subvention') => {
     const newSource: FinancingSource = {
       id: Math.random().toString(36).substr(2, 9),
-      label: type === 'apport' ? 'Apport Personnel' : type === 'pret' ? 'Prêt Bancaire' : 'Subvention',
+      label: type === 'apport' ? 'Apport Personnel' : type === 'emprunt' ? 'Prêt Bancaire' : 'Subvention',
       montant: 0,
-      taux: type === 'pret' ? 3.5 : undefined,
-      duree: type === 'pret' ? 60 : undefined,
+      type: type,
+      taux: type === 'emprunt' ? 3.5 : undefined,
+      duree: type === 'emprunt' ? 60 : undefined,
     };
     onUpdate([...state.financements, newSource]);
   };
 
   const updateSource = (id: string, field: keyof FinancingSource, value: any) => {
     const updated = state.financements.map(f => 
-      f.id === id ? { ...f, [field]: field === 'label' ? value : parseFloat(value) || 0 } : f
+      f.id === id ? { ...f, [field]: field === 'label' || field === 'type' ? value : parseFloat(value) || 0 } : f
     );
     onUpdate(updated);
   };
@@ -73,7 +74,15 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                 <tr key={f.id} className="hover:bg-slate-50 dark:hover:bg-[#1a1f2b]/50 transition-all">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <i className={f.taux !== undefined ? 'fa-solid fa-building-columns text-indigo-500 dark:text-indigo-400' : 'fa-solid fa-user text-indigo-500/70 dark:text-indigo-400/70'}></i>
+                      <select 
+                        value={f.type} 
+                        onChange={(e) => updateSource(f.id, 'type', e.target.value)}
+                        className="bg-transparent border-none text-indigo-500 font-bold p-0 focus:ring-0 text-xs outline-none cursor-pointer"
+                      >
+                        <option value="apport">Apport</option>
+                        <option value="emprunt">Emprunt</option>
+                        <option value="subvention">Subvention</option>
+                      </select>
                       <input 
                         type="text" 
                         value={f.label} 
@@ -85,6 +94,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                   <td className="p-4">
                     <input 
                       type="number" 
+                      min="0"
                       step={currency.decimals > 0 ? (1 / Math.pow(10, currency.decimals)).toString() : "1"}
                       value={f.montant || ''} 
                       onChange={(e) => updateSource(f.id, 'montant', e.target.value)}
@@ -92,9 +102,11 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                     />
                   </td>
                   <td className="p-4 text-center">
-                    {f.taux !== undefined ? (
+                    {f.type === 'emprunt' ? (
                       <input 
                         type="number" 
+                        min="0"
+                        max="100"
                         value={f.taux} 
                         onChange={(e) => updateSource(f.id, 'taux', e.target.value)}
                         className="w-20 text-center px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none transition-all"
@@ -102,9 +114,11 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
                     ) : <span className="text-slate-400 dark:text-slate-600 font-mono text-xs">N/A</span>}
                   </td>
                   <td className="p-4 text-center">
-                     {f.duree !== undefined ? (
+                     {f.type === 'emprunt' ? (
                       <input 
                         type="number" 
+                        min="1"
+                        max="360"
                         value={f.duree} 
                         onChange={(e) => updateSource(f.id, 'duree', e.target.value)}
                         className="w-20 text-center px-4 py-2 rounded-lg bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:border-indigo-500 outline-none transition-all"
@@ -150,7 +164,7 @@ const FinancementForm: React.FC<Props> = ({ state, onUpdate, onNext, onPrev }) =
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button onClick={() => addSource('pret')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">
+        <button onClick={() => addSource('emprunt')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">
           <i className="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i> Ajouter un prêt
         </button>
         <button onClick={() => addSource('subvention')} className="px-5 py-2.5 border-2 border-slate-200 dark:border-slate-700 hover:bg-white dark:hover:bg-[#242b3d] rounded-xl text-xs font-bold transition-all text-indigo-600 dark:text-indigo-400 flex items-center gap-2 group shadow-sm dark:shadow-none">

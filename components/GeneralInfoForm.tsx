@@ -123,6 +123,19 @@ const GeneralInfoForm: React.FC<Props> = ({ state, onUpdate, onUpdateCurrency, o
                 placeholder="Ex: Dakar"
               />
             </div>
+            <div>
+              <InputLabel iconClass="fa-solid fa-percent" label="Taux d'IS (%)" />
+              <input 
+                type="number" 
+                name="tauxIS" 
+                value={data.tauxIS} 
+                onChange={(e) => onUpdate({ ...data, tauxIS: Number(e.target.value) })}
+                className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                min="0"
+                max="100"
+              />
+              <p className="text-[10px] text-slate-500 mt-1 italic">Défaut zone FCFA : 30%</p>
+            </div>
           </div>
 
           <div>
