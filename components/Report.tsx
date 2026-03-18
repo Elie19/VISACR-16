@@ -236,8 +236,9 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
       const ratioRentabilite = tauxMarge * 100;
 
       // Seuil de rentabilité
+      const totalFixedCostsForSR = fixedCosts + totalSalairesEtCharges + dotAmort + chargesFin;
       const seuilRentabilite =
-        tauxMarge > 0 ? fixedCosts / tauxMarge : null;
+        tauxMarge > 0 ? totalFixedCostsForSR / tauxMarge : null;
 
       /* ------------------ */
       /* TRESORERIE */
@@ -423,7 +424,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Investissements HT</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(totalInvestissement)}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(totalInvestissement - (state.besoins?.['tresorerie-depart']?.montant || 0))}</td>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Apports Personnels</td>
                   <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0))}</td>
                 </tr>
@@ -432,6 +433,12 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                   <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(state.besoins?.['tresorerie-depart']?.montant || 0)}</td>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Emprunts Bancaires</td>
                   <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                </tr>
+                <tr>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300"></td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white"></td>
+                  <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Subventions</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0))}</td>
                 </tr>
                 <tr className="bg-indigo-50/30 dark:bg-indigo-500/5 font-bold">
                   <td className="px-6 py-4 text-indigo-600 dark:text-indigo-400 uppercase text-xs">Total Emplois</td>
@@ -620,6 +627,10 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                       <span className="font-normal text-[8px] italic">taux / durée mois</span>
                     </td>
                     <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                  </tr>
+                  <tr className="bg-slate-50 font-bold">
+                    <td className="border-2 border-black p-1.5 text-[10px]">Subvention</td>
+                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0))}</td>
                   </tr>
                   {(state.financements || []).filter(f => f.type === 'emprunt').map((f, i) => (
                     <tr key={f.id}>
