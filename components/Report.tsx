@@ -3,6 +3,62 @@ import { AppState, BesoinItem } from '../types';
 import { LISTE_CHARGES_KEYS, LISTE_BESOINS_KEYS, formatCurrency, formatPercent } from '../constants';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
+const COMPTE_RESULTAT_ROWS = [
+  "Chiffre d'affaires",
+  "Achats consommés",
+  "Marge brute",
+  "Charges externes",
+  "Valeur ajoutée",
+  "Salaires et charges",
+  "EBE",
+  "Charges financières",
+  "Amortissements",
+  "Résultat avant impôts",
+  "Impôts",
+  "Résultat net"
+];
+
+const TABLE_MODELS = {
+  planFinancement: [
+    "Immobilisations",
+    "Acquisition des stocks",
+    "Variation BFR",
+    "Remboursement emprunts",
+    "Total des besoins",
+    "Apport personnel",
+    "Emprunts",
+    "Subventions",
+    "Autres financements",
+    "Capacité d’autofinancement",
+    "Total des ressources",
+    "Variation de trésorerie",
+    "Excédent de trésorerie"
+  ],
+  compteResultat: COMPTE_RESULTAT_ROWS,
+  sig: [
+    "Chiffre d'affaires",
+    "Achats consommés",
+    "Marge brute",
+    "Valeur ajoutée",
+    "EBE",
+    "Capacité d'autofinancement"
+  ],
+  seuil: [
+    "Ventes + Production réelle",
+    "Achats consommés",
+    "Marge sur coûts variables",
+    "Taux de marge sur coûts variables",
+    "Coûts fixes (incl. amort. & fin.)",
+    "Seuil de rentabilité (chiffre d'affaires)"
+  ],
+  bfr: [
+    "Volume crédit client HT",
+    "Volume stock HT",
+    "Volume dettes fournisseurs HT",
+    "Besoin en fonds de roulement"
+  ]
+};
+
 interface Props {
   state: AppState;
   onPrev: () => void;
@@ -10,15 +66,18 @@ interface Props {
   isDarkMode: boolean;
 }
 
+const cleanNumber = (v: number) => Math.round(Number(v) || 0);
+
 const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
   const years = [0, 1, 2, 3, 4];
   const months = Array.from({ length: 12 }, (_, i) => i);
   const currency = state.currency;
   
-  const totalInvestissement = (Object.values(state.besoins || {}) as BesoinItem[]).reduce((a, b) => a + (b?.montant || 0), 0);
-  const totalFinancement = (state.financements || []).reduce((a, f) => a + (f?.montant || 0), 0);
-  const totalImmobilisations = totalInvestissement - (state.besoins?.['tresorerie-depart']?.montant || 0);
-  const tresorerieInitiale = totalFinancement - totalInvestissement + (state.besoins?.['tresorerie-depart']?.montant || 0);
+  const totalInvestissement = cleanNumber((Object.values(state.besoins || {}) as BesoinItem[]).reduce((a, b) => a + (b?.montant || 0), 0));
+  const totalFinancement = cleanNumber((state.financements || []).reduce((a, f) => a + (f?.montant || 0), 0));
+  const totalImmobilisations = cleanNumber(totalInvestissement - (state.besoins?.['tresorerie-depart']?.montant || 0));
+  const stockInitial = cleanNumber(state.besoins?.['stock']?.montant || 0);
+  const tresorerieInitiale = cleanNumber(totalFinancement - totalImmobilisations);
 
   /* ------------------------------------------------------ */
   /* TABLEAU D'AMORTISSEMENT DES EMPRUNTS (EXCEL LOGIC) */
@@ -98,7 +157,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
     let prevBfr = 0;
 
     years.forEach((y, idx) => {
-      const ca = safe(caArr[idx]);
+      const ca = cleanNumber(safe(caArr[idx]));
 
       /* ------------------ */
       /* COUT MARCHANDISES */
@@ -109,9 +168,9 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         100
       );
 
-      const costOfGoods = isServices ? 0 : ca * (tauxCOGS / 100);
+      const costOfGoods = cleanNumber(isServices ? 0 : ca * (tauxCOGS / 100));
 
-      const margin = ca - costOfGoods;
+      const margin = cleanNumber(ca - costOfGoods);
 
       /* ------------------ */
       /* CHARGES (SOMME) */
@@ -139,6 +198,11 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         salairesEmp *= factor;
       }
 
+      fixedCosts = cleanNumber(fixedCosts);
+      salairesTotal = cleanNumber(salairesTotal);
+      remunDir = cleanNumber(remunDir);
+      salairesEmp = cleanNumber(salairesEmp);
+
       /* ------------------ */
       /* AMORTISSEMENTS */
       /* Excel: =SI(année <= durée; montant/durée;0) */
@@ -147,7 +211,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         const item = state.besoins?.[bKey.id];
 
         if (item && item.amortissement > 0 && idx < item.amortissement) {
-          acc[bKey.id] = item.montant / item.amortissement;
+          acc[bKey.id] = cleanNumber(item.montant / item.amortissement);
         } else {
           acc[bKey.id] = 0;
         }
@@ -155,20 +219,20 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         return acc;
       }, {} as Record<string, number>);
 
-      const dotAmort = Object.values(amortDetails)
-        .reduce((a, b) => a + b, 0);
+      const dotAmort = cleanNumber(Object.values(amortDetails)
+        .reduce((a, b) => a + b, 0));
 
       /* ------------------ */
       /* FINANCEMENT */
       /* ------------------ */
-      const chargesFin = loanSchedule.interests[idx] || 0;
-      const remboursementEmprunt = loanSchedule.principals[idx] || 0;
+      const chargesFin = cleanNumber(loanSchedule.interests[idx] || 0);
+      const remboursementEmprunt = cleanNumber(loanSchedule.principals[idx] || 0);
 
       /* ------------------ */
       /* VA */
       /* Excel: =Marge - Charges */
       /* ------------------ */
-      const va = margin - fixedCosts;
+      const va = cleanNumber(margin - fixedCosts);
 
       /* ------------------ */
       /* SALAIRES */
@@ -183,47 +247,48 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         tauxChargesDirNet = isAssimileSalarie ? 0.35 : 0.25;
       }
 
-      const chargesSocDir = remunDir * tauxChargesDirNet;
-      const chargesSocEmp = salairesEmp * tauxChargesEmpNet;
+      const chargesSocDir = cleanNumber(remunDir * tauxChargesDirNet);
+      const chargesSocEmp = cleanNumber(salairesEmp * tauxChargesEmpNet);
 
       const totalSalairesEtCharges =
-        salairesTotal + chargesSocDir + chargesSocEmp;
+        cleanNumber(salairesTotal + chargesSocDir + chargesSocEmp);
 
       /* ------------------ */
       /* EBE */
       /* ------------------ */
-      const ebe = va - totalSalairesEtCharges;
+      const ebe = cleanNumber(va - totalSalairesEtCharges);
 
       /* ------------------ */
       /* RESULTAT */
       /* ------------------ */
-      const resExploit = ebe - dotAmort;
-      const resAvantImpots = resExploit - chargesFin;
+      const resExploit = cleanNumber(ebe - dotAmort);
+      const resAvantImpots = cleanNumber(resExploit - chargesFin);
 
       /* ------------------ */
       /* IMPOT */
       /* Excel: =SI(resultat>0; resultat*taux;0) */
       /* ------------------ */
       const tauxIS = state.generalInfo?.tauxIS || 0;
-      const is = resAvantImpots > 0 ? resAvantImpots * (tauxIS / 100) : 0;
+      const is = cleanNumber(resAvantImpots > 0 ? resAvantImpots * (tauxIS / 100) : 0);
 
-      const netResult = resAvantImpots - is;
+      const netResult = cleanNumber(resAvantImpots - is);
 
       /* ------------------ */
       /* CAF */
       /* ------------------ */
-      const caf = netResult + dotAmort;
+      const caf = cleanNumber(netResult + dotAmort);
+      const autofinancementNet = cleanNumber(caf - remboursementEmprunt);
       cumulCaf += caf;
 
       /* ------------------ */
       /* BFR */
       /* ------------------ */
-      const creditClient = ca * ((state.revenue?.joursClients || 0) / 365);
-      const stock = costOfGoods * ((state.revenue?.joursStock || 0) / 365);
-      const detteFournisseur = costOfGoods * ((state.revenue?.joursFournisseurs || 0) / 365);
+      const creditClient = cleanNumber(ca * ((state.revenue?.joursClients || 0) / 365));
+      const stock = cleanNumber(costOfGoods * ((state.revenue?.joursStock || 0) / 365));
+      const detteFournisseur = cleanNumber(costOfGoods * ((state.revenue?.joursFournisseurs || 0) / 365));
 
-      const bfr = creditClient + stock - detteFournisseur;
-      const bfrVariation = bfr - prevBfr;
+      const bfr = cleanNumber(creditClient + stock - detteFournisseur);
+      const bfrVariation = idx === 0 ? bfr : cleanNumber(bfr - prevBfr);
       prevBfr = bfr;
 
       /* ------------------ */
@@ -236,22 +301,22 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
       const ratioRentabilite = tauxMarge * 100;
 
       // Seuil de rentabilité
-      const totalFixedCostsForSR = fixedCosts + totalSalairesEtCharges + dotAmort + chargesFin;
+      const coutsFixes = cleanNumber(fixedCosts + totalSalairesEtCharges + dotAmort + chargesFin);
       const seuilRentabilite =
-        tauxMarge > 0 ? totalFixedCostsForSR / tauxMarge : null;
+        tauxMarge > 0 ? cleanNumber(coutsFixes / tauxMarge) : null;
 
       /* ------------------ */
       /* TRESORERIE */
       /* ------------------ */
-      const cumulRemboursements = loanSchedule.principals
+      const cumulRemboursements = cleanNumber(loanSchedule.principals
         .slice(0, idx + 1)
-        .reduce((a, b) => a + b, 0);
+        .reduce((a, b) => a + b, 0));
 
       const soldeTresorerieFinAnnee =
-        tresorerieInitiale +
+        cleanNumber(tresorerieInitiale +
         cumulCaf -
         bfr -
-        cumulRemboursements;
+        cumulRemboursements);
 
       results.push({
         year: idx + 1,
@@ -279,13 +344,15 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
         is,
         netResult,
         caf,
+        autofinancementNet,
         remboursementEmprunt,
         creditClient,
         stock,
         detteFournisseur,
         bfr,
         bfrVariation,
-        soldeTresorerieFinAnnee
+        soldeTresorerieFinAnnee,
+        coutsFixes
       });
     });
 
@@ -298,19 +365,19 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
     const year1Data = financialData[0];
     
     return months.map(m => {
-      const ca = state.revenue?.caMensuel?.[m] || 0;
-      const costOfGoods = ca * ((state.revenue?.tauxCoutMarchandises || 0) / 100);
+      const ca = cleanNumber(state.revenue?.caMensuel?.[m] || 0);
+      const costOfGoods = cleanNumber(ca * ((state.revenue?.tauxCoutMarchandises || 0) / 100));
       
       // Répartition mensuelle des charges fixes et salaires
-      const fixedCharges = (year1Data?.fixedCosts || 0) / 12;
-      const salairesEtCharges = (year1Data?.totalSalairesEtCharges || 0) / 12;
-      const chargesFinancieres = (year1Data?.chargesFin || 0) / 12;
-      const remboursement = (year1Data?.remboursementEmprunt || 0) / 12;
+      const fixedCharges = cleanNumber((year1Data?.fixedCosts || 0) / 12);
+      const salairesEtCharges = cleanNumber((year1Data?.totalSalairesEtCharges || 0) / 12);
+      const chargesFinancieres = cleanNumber((year1Data?.chargesFin || 0) / 12);
+      const remboursement = cleanNumber((year1Data?.remboursementEmprunt || 0) / 12);
 
       const encaissements = ca;
-      const decaissements = costOfGoods + fixedCharges + salairesEtCharges + chargesFinancieres + remboursement;
-      const fluxMois = encaissements - decaissements;
-      soldeCumule += fluxMois;
+      const decaissements = cleanNumber(costOfGoods + fixedCharges + salairesEtCharges + chargesFinancieres + remboursement);
+      const fluxMois = cleanNumber(encaissements - decaissements);
+      soldeCumule = cleanNumber(soldeCumule + fluxMois);
 
       return {
         mois: m + 1,
@@ -324,6 +391,115 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
       };
     });
   }, [state, tresorerieInitiale, financialData]);
+
+  const getValue = (row: string, idx: number): number => {
+    const d = financialData[idx];
+
+    switch (row) {
+      case "Immobilisations":
+        return idx === 0 ? totalImmobilisations : 0;
+
+      case "Acquisition des stocks":
+        return idx === 0 ? stockInitial : 0;
+
+      case "Variation BFR":
+        return d?.bfrVariation || 0;
+
+      case "Remboursement emprunts":
+        return d?.remboursementEmprunt || 0;
+
+      case "Total des besoins":
+        return cleanNumber(
+          getValue("Immobilisations", idx) +
+          getValue("Acquisition des stocks", idx) +
+          getValue("Variation BFR", idx) +
+          getValue("Remboursement emprunts", idx)
+        );
+
+      case "Apport personnel": {
+        const total = cleanNumber((state.financements || [])
+          .filter(f => f.type === "apport")
+          .reduce((a, f) => a + (f.montant || 0), 0));
+        return idx === 0 ? total : 0;
+      }
+
+      case "Emprunts": {
+        const total = cleanNumber((state.financements || [])
+          .filter(f => f.type === "emprunt")
+          .reduce((a, f) => a + (f.montant || 0), 0));
+        return idx === 0 ? total : 0;
+      }
+
+      case "Subventions": {
+        const total = cleanNumber((state.financements || [])
+          .filter(f => f.type === "subvention")
+          .reduce((a, f) => a + (f.montant || 0), 0));
+        return idx === 0 ? total : 0;
+      }
+
+      case "Autres financements":
+        return 0;
+
+      case "Capacité d’autofinancement":
+        return d?.caf || 0;
+
+      case "Total des ressources":
+        return cleanNumber(
+          getValue("Apport personnel", idx) +
+          getValue("Emprunts", idx) +
+          getValue("Subventions", idx) +
+          getValue("Autres financements", idx) +
+          getValue("Capacité d’autofinancement", idx)
+        );
+
+      case "Variation de trésorerie":
+        return cleanNumber(
+          getValue("Total des ressources", idx) -
+          getValue("Total des besoins", idx)
+        );
+
+      case "Excédent de trésorerie":
+        let cumul = 0;
+        for (let i = 0; i <= idx; i++) {
+          cumul = cleanNumber(cumul + getValue("Variation de trésorerie", i));
+        }
+        return cumul;
+
+      // Compte de Résultat
+      case "Chiffre d'affaires": return d?.ca || 0;
+      case "Achats consommés": return d?.costOfGoods || 0;
+      case "Marge brute": return d?.margin || 0;
+      case "Charges externes": return d?.fixedCosts || 0;
+      case "Valeur ajoutée": return d?.va || 0;
+      case "Salaires et charges": return d?.totalSalairesEtCharges || 0;
+      case "EBE": return d?.ebe || 0;
+      case "Charges financières": return d?.chargesFin || 0;
+      case "Amortissements": return d?.dotAmort || 0;
+      case "Résultat avant impôts": return d?.resAvantImpots || 0;
+      case "Impôts": return d?.is || 0;
+      case "Résultat net": return d?.netResult || 0;
+
+      // SIG / Autres
+      case "Capacité d'autofinancement": return d?.caf || 0;
+      case "Autofinancement net": return d?.autofinancementNet || 0;
+
+      // Seuil
+      case "Ventes + Production réelle": return d?.ca || 0;
+      case "Marge sur coûts variables": return d?.margin || 0;
+      case "Taux de marge sur coûts variables": return (d?.tauxMarge || 0) * 100;
+      case "Coûts fixes (incl. amort. & fin.)": return d?.coutsFixes || 0;
+      case "Seuil de rentabilité (chiffre d'affaires)": return d?.seuilRentabilite || 0;
+
+      // BFR
+      case "Volume crédit client HT": return d?.creditClient || 0;
+      case "Volume stock HT": return d?.stock || 0;
+      case "Volume dettes fournisseurs HT": return d?.detteFournisseur || 0;
+      case "Besoin en fonds de roulement": return d?.bfr || 0;
+
+      default:
+        return 0;
+    }
+  };
 
   if (!currency) return <div className="p-20 text-center">Chargement des données monétaires...</div>;
 
@@ -424,21 +600,21 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Investissements HT</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(totalInvestissement - (state.besoins?.['tresorerie-depart']?.montant || 0))}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(totalImmobilisations)}</td>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Apports Personnels</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Trésorerie de départ</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(state.besoins?.['tresorerie-depart']?.montant || 0)}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(cleanNumber(state.besoins?.['tresorerie-depart']?.montant || 0))}</td>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Emprunts Bancaires</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300"></td>
                   <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white"></td>
                   <td className="px-6 py-4 text-slate-600 dark:text-slate-300">Subventions</td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-900 dark:text-white">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                 </tr>
                 <tr className="bg-indigo-50/30 dark:bg-indigo-500/5 font-bold">
                   <td className="px-6 py-4 text-indigo-600 dark:text-indigo-400 uppercase text-xs">Total Emplois</td>
@@ -472,7 +648,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                 </tr>
                 <tr>
                   <td className="px-6 py-4 text-slate-500 dark:text-slate-400 italic pl-10 sticky left-0 bg-white dark:bg-gray-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Charges d'exploitation</td>
-                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-600 dark:text-slate-400">{formatVal(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges)}</td>)}
+                  {financialData.map(d => <td key={d.year} className="px-6 py-4 text-right font-mono text-slate-600 dark:text-slate-400">{formatVal(cleanNumber(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges))}</td>)}
                 </tr>
                 <tr className="bg-slate-50/50 dark:bg-slate-800/20">
                   <td className="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 sticky left-0 bg-slate-50 dark:bg-gray-800 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Résultat d'Exploitation</td>
@@ -619,18 +795,18 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                <tbody>
                   <tr className="bg-slate-50 font-bold">
                     <td className="border-2 border-black p-1.5 text-[10px]">Apport personnel</td>
-                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                   </tr>
                   <tr className="bg-slate-50 font-bold">
                     <td className="border-2 border-black p-1.5 text-[10px] flex justify-between">
                       <span>Emprunt</span>
                       <span className="font-normal text-[8px] italic">taux / durée mois</span>
                     </td>
-                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                   </tr>
                   <tr className="bg-slate-50 font-bold">
                     <td className="border-2 border-black p-1.5 text-[10px]">Subvention</td>
-                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0))}</td>
+                    <td className="border-2 border-black p-1.5 text-right text-[10px] font-mono">{formatVal(cleanNumber((state.financements || []).filter(f => f.type === 'subvention').reduce((a,f)=>a+(f?.montant||0),0)))}</td>
                   </tr>
                   {(state.financements || []).filter(f => f.type === 'emprunt').map((f, i) => (
                     <tr key={f.id}>
@@ -746,7 +922,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                 
                 <tr className="bg-slate-50 font-bold">
                    <td className="border-2 border-black p-1">Charges d'exploitation</td>
-                   {financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges)}</td>)}
+                   {financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(cleanNumber(d.costOfGoods + d.fixedCosts + d.totalSalairesEtCharges))}</td>)}
                 </tr>
                 <tr><td className="border-2 border-black p-1 pl-4 italic">Achats consommés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Marge brute</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td>)}</tr>
@@ -789,11 +965,11 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
               </thead>
               <tbody className="print:text-black">
                 <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 font-bold">Chiffre d'affaires</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.ca)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">100%</td></React.Fragment>)}</tr>
-                <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.costOfGoods/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-50 dark:bg-slate-800/30 print:bg-slate-50 font-bold"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Marge globale</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.margin)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.margin/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-100 dark:bg-slate-800/50 print:bg-slate-100 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">Valeur ajoutée</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.va)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.va/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-200 dark:bg-slate-800/70 print:bg-slate-200 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">E.B.E.</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.ebe)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.ebe/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
-                <tr className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 print:bg-black print:text-white font-black"><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 uppercase">Capacité autofinancement</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-right font-mono">{formatVal(d.caf)}</td><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-center">{d.ca > 0 ? ((d.caf/d.ca)*100).toFixed(0) : '0'}%</td></React.Fragment>)}</tr>
+                <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.costOfGoods/d.ca)*100).toFixed(1) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-50 dark:bg-slate-800/30 print:bg-slate-50 font-bold"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Marge globale</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.margin)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.margin/d.ca)*100).toFixed(1) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-100 dark:bg-slate-800/50 print:bg-slate-100 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">Valeur ajoutée</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.va)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.va/d.ca)*100).toFixed(1) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-200 dark:bg-slate-800/70 print:bg-slate-200 font-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">E.B.E.</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.ebe)}</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-center">{d.ca > 0 ? ((d.ebe/d.ca)*100).toFixed(1) : '0'}%</td></React.Fragment>)}</tr>
+                <tr className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 print:bg-black print:text-white font-black"><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 uppercase">Capacité autofinancement</td>{financialData.map(d => <React.Fragment key={d.year}><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-right font-mono">{formatVal(d.caf)}</td><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-center">{d.ca > 0 ? ((d.caf/d.ca)*100).toFixed(1) : '0'}%</td></React.Fragment>)}</tr>
               </tbody>
             </table>
           </div>
@@ -813,7 +989,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                 <tr><td className="border-2 border-black p-1.5 italic">+ Dotation aux amortissements</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.dotAmort)}</td>)}</tr>
                 <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1.5 uppercase">Capacité d'autofinancement</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
                 <tr><td className="border-2 border-black p-1.5 italic">- Remboursement d'emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1.5 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
-                <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1.5 uppercase">Autofinancement net</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1.5 text-right font-mono">{formatVal(d.caf - d.remboursementEmprunt)}</td>)}</tr>
+                <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1.5 uppercase">Autofinancement net</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1.5 text-right font-mono">{formatVal(cleanNumber(d.caf - d.remboursementEmprunt))}</td>)}</tr>
               </tbody>
             </table>
           </div>
@@ -837,8 +1013,8 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
                 <tr className="font-bold border-t-2 border-black"><td className="border-2 border-black p-1">Ventes + Production réelle</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.ca)}</td>)}</tr>
                 <tr><td className="border-2 border-black p-1 italic pl-4">Achats consommés</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.costOfGoods)}</td>)}</tr>
                 <tr className="bg-slate-100 font-bold border-t-2 border-black"><td className="border-2 border-black p-1">Marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.margin)}</td>)}</tr>
-                <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Taux de marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-center font-mono">{(d.tauxMarge * 100).toFixed(0)}%</td>)}</tr>
-                <tr><td className="border-2 border-black p-1 italic">Coûts fixes (incl. amort. & fin.)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fixedCosts + d.totalSalairesEtCharges + d.dotAmort + d.chargesFin)}</td>)}</tr>
+                <tr className="bg-slate-200 font-black"><td className="border-2 border-black p-1">Taux de marge sur coûts variables</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-center font-mono">{(d.tauxMarge * 100).toFixed(1)}%</td>)}</tr>
+                <tr><td className="border-2 border-black p-1 italic">Coûts fixes (incl. amort. & fin.)</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.coutsFixes)}</td>)}</tr>
                 <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1 uppercase">Seuil de rentabilité (chiffre d'affaires)</td>{financialData.map(d => <td key={d.year} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.seuilRentabilite ?? 0)}</td>)}</tr>
               </tbody>
             </table>
@@ -892,19 +1068,17 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
               </tr>
             </thead>
             <tbody>
-              <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={6}>Emplois (Besoins)</td></tr>
-              <tr><td className="border-2 border-black p-1">Investissements (Immobilisations)</td><td className="border-2 border-black p-1 text-right font-mono">{formatVal(totalImmobilisations)}</td><td colSpan={4} className="border-2 border-black"></td></tr>
-              <tr><td className="border-2 border-black p-1">Variation du BFR</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.bfrVariation)}</td>)}</tr>
-              <tr><td className="border-2 border-black p-1">Remboursement d'emprunts</td>{financialData.map(d => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.remboursementEmprunt)}</td>)}</tr>
-              <tr className="bg-slate-100 font-bold"><td className="border-2 border-black p-1 uppercase">Total des emplois</td>{financialData.map((d, i) => <td key={d.year} className="border-2 border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalImmobilisations : 0) + d.bfrVariation + d.remboursementEmprunt)}</td>)}</tr>
-              
-              <tr className="bg-slate-50 dark:bg-slate-800/50 font-bold border-t-4 border-slate-900 dark:border-slate-100 print:bg-slate-50 print:text-black print:border-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase" colSpan={6}>Ressources</td></tr>
-              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Apports personnels</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.type === 'apport').reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border border-slate-300 dark:border-slate-700 print:border-black"></td></tr>
-              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Emprunts bancaires</td><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((state.financements || []).filter(f => f.type === 'emprunt').reduce((a,f)=>a+(f?.montant||0),0))}</td><td colSpan={4} className="border border-slate-300 dark:border-slate-700 print:border-black"></td></tr>
-              <tr><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1">Capacité d'autofinancement (CAF)</td>{financialData.map(d => <td key={d.year} className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal(d.caf)}</td>)}</tr>
-              <tr className="bg-slate-100 dark:bg-slate-800/50 font-bold print:bg-slate-100 print:text-black"><td className="border border-slate-300 dark:border-slate-700 print:border-black p-1 uppercase">Total des ressources</td>{financialData.map((d, i) => <td key={d.year} className="border border-slate-300 dark:border-slate-700 print:border-black p-1 text-right font-mono">{formatVal((i === 0 ? totalFinancement : 0) + d.caf)}</td>)}</tr>
-              
-              <tr className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-black border-t-2 border-white print:bg-black print:text-white print:border-black"><td className="border border-slate-700 dark:border-slate-300 print:border-black p-1 uppercase">Solde de trésorerie annuel</td>{financialData.map(d => <td key={d.year} className="border border-slate-700 dark:border-slate-300 print:border-black p-1 text-right font-mono">{formatVal(d.soldeTresorerieFinAnnee)}</td>)}</tr>
+              {TABLE_MODELS.planFinancement.map(row => (
+                <tr key={row}>
+                  <td className="border-2 border-black p-1">{row}</td>
+
+                  {years.map((y, idx) => (
+                    <td key={idx} className="border-2 border-black p-1 text-right">
+                      {formatVal(getValue(row, idx))}
+                    </td>
+                  ))}
+                </tr>
+              ))}
             </tbody>
           </table>
           <p className="text-right w-full text-xs font-bold mt-4 italic">7</p>
@@ -962,7 +1136,7 @@ const Report: React.FC<Props> = ({ state, onPrev, onReset, isDarkMode }) => {
               <tr><td className="border-2 border-black p-1 italic pl-4">Ventes de marchandises / services</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.encaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(financialData[0]?.ca || 0) || '-'}</td></tr>
               
               <tr className="bg-slate-50 font-bold"><td className="border-2 border-black p-1 uppercase" colSpan={8}>Décaissements</td></tr>
-              <tr><td className="border-2 border-black p-1 italic pl-4">Total décaissements mensuels</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(monthlyDataYear1.reduce((a,d)=>a+d.decaissements,0)) || '-'}</td></tr>
+              <tr><td className="border-2 border-black p-1 italic pl-4">Total décaissements mensuels</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.decaissements)}</td>)}<td className="border-2 border-black p-1 text-right font-black font-mono">{formatVal(cleanNumber(monthlyDataYear1.reduce((a,d)=>a+d.decaissements,0))) || '-'}</td></tr>
               
               <tr className="border-t-2 border-black bg-slate-200 font-black"><td className="border-2 border-black p-1">Solde du mois</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-black p-1 text-right font-mono">{formatVal(d.fluxMois)}</td>)}<td className="border-2 border-black p-1"></td></tr>
               <tr className="bg-black text-white font-black"><td className="border-2 border-white p-1">Solde de trésorerie (cumul)</td>{monthlyDataYear1.slice(6,12).map(d => <td key={d.mois} className="border-2 border-white p-1 text-right font-mono">{formatVal(d.soldeCumule)}</td>)}<td className="border-2 border-white p-1 text-right font-black font-mono">{formatVal(financialData[0]?.soldeTresorerieFinAnnee || 0) || '-'}</td></tr>
